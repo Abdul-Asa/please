@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { Provider as JotaiProvider } from "jotai";
 
 function ThemeProvider({
   children,
@@ -18,7 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      <JotaiProvider>{children}</JotaiProvider>
     </ThemeProvider>
   );
 }

@@ -1,5 +1,29 @@
 import { Direction, Point } from "./types";
 
+export const readFileContent = (file: File): Promise<string | ArrayBuffer> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    // Determine how to read the file based on its type
+    if (file.type.startsWith("image/")) {
+      reader.readAsDataURL(file); // Read images as data URL
+    } else if (
+      file.type.startsWith("text/") ||
+      file.type === "application/json" ||
+      file.type === "application/xml" ||
+      file.type === "application/javascript" ||
+      file.type.includes("document")
+    ) {
+      reader.readAsText(file); // Read text files as text
+    } else {
+      reader.readAsArrayBuffer(file); // Read other files as binary
+    }
+
+    reader.onload = () => resolve(reader.result as string | ArrayBuffer);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 // Calculate the anchor point of an edge based on the node and the anchoring side
 export function getAnchorPoint(node: HTMLElement, side: Direction) {
   const x = parseInt(node.style.left, 10);

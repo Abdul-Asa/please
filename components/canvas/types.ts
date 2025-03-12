@@ -1,6 +1,7 @@
 export type NodeType = "text" | "file" | "sticky";
 export type Direction = "top" | "right" | "bottom" | "left";
 export type MarkerType = "none" | "arrow";
+export type FileType = "image" | "pdf" | "text";
 export interface Point {
   x: number;
   y: number;
@@ -25,6 +26,7 @@ export interface TextNode extends BaseNode {
 export interface FileNode extends BaseNode {
   type: "file";
   file: string;
+  fileType: FileType;
 }
 
 export interface StickyNode extends BaseNode {

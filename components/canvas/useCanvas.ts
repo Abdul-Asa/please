@@ -1,10 +1,23 @@
 import { useAtom } from "jotai";
 import { useContext, useRef, useCallback, useEffect, useState } from "react";
-import { nodesAtom, edgesAtom, viewportAtom } from "./atoms";
-import { VIEWPORT_CONSTANTS, defaultViewport } from "./constants";
+import {
+  nodesAtom,
+  edgesAtom,
+  viewportAtom,
+  storeFileContent,
+  deleteFileContent,
+  FileContent,
+} from "./store";
+import {
+  VIEWPORT_CONSTANTS,
+  NODE_CONSTANTS,
+  defaultViewport,
+} from "./constants";
+import type { Node, FileNode, FileType } from "./types";
 import { CanvasContext } from "./Context";
-const { MIN_SCALE, MAX_SCALE, ZOOM_SPEED, ZOOM_BUTTON_FACTOR } =
-  VIEWPORT_CONSTANTS;
+import { nanoid } from "nanoid";
+import { readFileContent } from "./utils";
+const { MIN_SCALE, MAX_SCALE, ZOOM_BUTTON_FACTOR } = VIEWPORT_CONSTANTS;
 
 export function useCanvas() {
   const context = useContext(CanvasContext);
@@ -267,14 +280,151 @@ export function useCanvas() {
     [viewport, setNodes]
   );
 
+  // Delete node function
+  const deleteNode = useCallback(
+    (nodeId: string) => {
+      // Get the node before deleting it
+      const nodeToDelete = nodes.find((node) => node.id === nodeId);
+
+      // Delete the node from the nodes array
+      setNodes((prevNodes) => prevNodes.filter((node) => node.id !== nodeId));
+
+      // If it's a file node, also delete the file content from IndexedDB
+      if (nodeToDelete?.type === "file") {
+        deleteFileContent(nodeId).catch((err) =>
+          console.error("Failed to delete file content:", err)
+        );
+      }
+
+      // Clear selection if the deleted node was selected
+      if (
+        viewport.selectedNodeId === nodeId ||
+        viewport.lastSelectedNodeId === nodeId
+      ) {
+        setViewport((prev) => ({
+          ...prev,
+          selectedNodeId:
+            prev.selectedNodeId === nodeId ? "" : prev.selectedNodeId,
+          lastSelectedNodeId:
+            prev.lastSelectedNodeId === nodeId ? "" : prev.lastSelectedNodeId,
+        }));
+      }
+    },
+    [nodes, setNodes, viewport, setViewport]
+  );
+
+  // Helper function to get random position within visible canvas
+  const getRandomPositionInViewport = useCallback(() => {
+    // Calculate visible canvas area
+    const visibleWidth = window.innerWidth / viewport.scale;
+    const visibleHeight = window.innerHeight / viewport.scale;
+
+    // Calculate the visible area boundaries in canvas coordinates
+    const visibleLeft = -viewport.panOffsetX / viewport.scale;
+    const visibleTop = -viewport.panOffsetY / viewport.scale;
+
+    // Add padding from edges (10% of visible area)
+    const paddingX = visibleWidth * 0.1;
+    const paddingY = visibleHeight * 0.1;
+
+    // Generate random position within visible area with padding
+    return {
+      x: visibleLeft + paddingX + Math.random() * (visibleWidth - paddingX * 2),
+      y: visibleTop + paddingY + Math.random() * (visibleHeight - paddingY * 2),
+    };
+  }, [viewport]);
+
+  // Node creation functions
+  const addTextNode = useCallback(() => {
+    const position = getRandomPositionInViewport();
+
+    const newNode: Node = {
+      id: nanoid(),
+      label: "Untitled-" + nanoid(6),
+      type: "text",
+      text: "New text",
+      x: position.x,
+      y: position.y,
+      width: NODE_CONSTANTS.TEXT_NODE_WIDTH,
+      height: NODE_CONSTANTS.MIN_HEIGHT,
+    };
+
+    setNodes((prev) => [...prev, newNode]);
+    return newNode;
+  }, [getRandomPositionInViewport, setNodes]);
+
+  // Updated file node creation with file upload handling
+  const addFileNode = useCallback(
+    async (file: File, fileType: FileType) => {
+      const position = getRandomPositionInViewport();
+      const nodeId = nanoid();
+      const fileName = file.name || "Untitled file-" + nanoid(6);
+
+      // Create the base node
+      const newNode: FileNode = {
+        id: nodeId,
+        type: "file",
+        file: fileName,
+        label: fileName,
+        x: position.x,
+        y: position.y,
+        width: NODE_CONSTANTS.FILE_NODE_WIDTH,
+        height: NODE_CONSTANTS.MIN_HEIGHT,
+        fileType: fileType,
+      };
+
+      try {
+        // Read the file content
+        const content = await readFileContent(file);
+
+        // Store in IndexedDB
+        const fileContent: FileContent = {
+          id: nodeId,
+          name: fileName,
+          type: fileType,
+          content,
+          size: file.size,
+          lastModified: file.lastModified,
+        };
+
+        await storeFileContent(fileContent);
+      } catch (error) {
+        console.error("Error processing file:", error);
+        // Continue with node creation even if file processing fails
+      }
+
+      setNodes((prev) => [...prev, newNode]);
+      return newNode;
+    },
+    [getRandomPositionInViewport, setNodes]
+  );
+
+  const addStickyNode = useCallback(() => {
+    const position = getRandomPositionInViewport();
+
+    const newNode: Node = {
+      id: nanoid(),
+      type: "sticky",
+      label: "New note-" + nanoid(6),
+      text: "New note",
+      x: position.x,
+      y: position.y,
+      width: NODE_CONSTANTS.STICKY_NODE_WIDTH,
+      height: NODE_CONSTANTS.STICKY_NODE_WIDTH,
+    };
+
+    setNodes((prev) => [...prev, newNode]);
+    return newNode;
+  }, [getRandomPositionInViewport, setNodes]);
+
   // Initialize the canvas
   useEffect(() => {
     if (initialData) {
       setNodes(initialData.nodes);
       setEdges(initialData.edges);
       resetView();
-      setLoading(false);
     }
+    setLoading(false);
   }, [initialData]);
 
   // Manage cursor class based on panMode
@@ -343,6 +493,10 @@ export function useCanvas() {
       zoomOut,
       resetView,
       togglePanMode,
+      addTextNode,
+      addFileNode,
+      addStickyNode,
+      deleteNode,
     },
     dragHandlers: {
       startNodeDrag,

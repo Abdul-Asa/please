@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Minus, Plus, RotateCcw, Move, Box } from "lucide-react";
 import { useCanvas } from "./useCanvas";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { ModeToggle } from "../ui/mode-toggle";
 
 export function CanvasControls() {
   const { controls, canvas } = useCanvas();
@@ -11,12 +11,55 @@ export function CanvasControls() {
   const { panMode, scale } = canvas.viewport;
 
   return (
-    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-md bg-white/90 px-2 py-1 shadow-sm">
-      <button className="text-gray-600 hover:text-gray-900">-</button>
-      <span className="min-w-[4rem] text-center">
-        {Math.round(scale * 100)}%
-      </span>
-      <button className="text-gray-600 hover:text-gray-900">+</button>
-    </div>
+    <>
+      <div className="absolute bottom-4 left-4 flex items-center gap-1 rounded-md bg-background/90 border border-border px-2 py-1.5 backdrop-blur-sm">
+        <Button variant="ghost" size="icon" onClick={zoomOut} title="Zoom Out">
+          <Minus size={18} />
+        </Button>
+
+        <div
+          className="min-w-[4.5rem] px-2 text-center text-sm cursor-pointer"
+          onClick={resetView}
+          title="Reset Zoom"
+        >
+          {Math.round(scale * 100)}%
+        </div>
+
+        <Button variant="ghost" size="icon" onClick={zoomIn} title="Zoom In">
+          <Plus size={18} />
+        </Button>
+
+        <div className="h-6 w-px bg-border mx-1"></div>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "border border-transparent",
+            panMode && "border-primary"
+          )}
+          onClick={togglePanMode}
+          title="Toggle Pan Mode"
+        >
+          <Move size={18} />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={resetView}
+          title="Reset View"
+        >
+          <RotateCcw size={18} />
+        </Button>
+      </div>
+      <div className="absolute bottom-4 right-4 flex items-center gap-1 rounded-md bg-background/90 border border-border px-2 py-1.5 backdrop-blur-sm">
+        <Button variant="ghost" size="icon" title="Toggle Grid">
+          <Box size={18} />
+        </Button>
+        <div className="h-6 w-px bg-border mx-1"></div>
+        <ModeToggle />
+      </div>
+    </>
   );
 }

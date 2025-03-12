@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import { CanvasData } from "./types";
 
 interface CanvasContextType {
-  initialData?: CanvasData;
+  initialData: CanvasData | null;
 }
 
 export const CanvasContext = createContext<CanvasContextType | null>(null);
@@ -12,7 +12,7 @@ export function CanvasProvider({
   initialData,
 }: {
   children: ReactNode;
-  initialData?: CanvasData;
+  initialData: CanvasData | null;
 }) {
   return (
     <CanvasContext.Provider value={{ initialData }}>

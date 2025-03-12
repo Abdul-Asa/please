@@ -7,6 +7,14 @@ export const VIEWPORT_CONSTANTS = {
   ZOOM_BUTTON_FACTOR: 1.05,
 } as const;
 
+export const NODE_CONSTANTS = {
+  // A4 aspect ratio is roughly 1:1.414 (width:height)
+  TEXT_NODE_WIDTH: 500, // Standard width for text nodes (like A4)
+  FILE_NODE_WIDTH: 800, // Standard width for file nodes (like A4)
+  STICKY_NODE_WIDTH: 300, // Default width for sticky notes
+  MIN_HEIGHT: 800, // Minimum height for all nodes
+} as const;
+
 export const defaultViewport: Viewport = {
   scale: 1,
   panOffsetX: 0,
