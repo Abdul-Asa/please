@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useCanvas } from "./useCanvas";
 import { useRef, useState } from "react";
-import { FileType } from "./types";
 import {
   Popover,
   PopoverContent,
@@ -23,6 +22,7 @@ export function CanvasToolbar() {
   const { addTextNode, addFileNode, addStickyNode } = canvas.controls;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [acceptTypes, setAcceptTypes] = useState<string>("");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   // Function to handle different file type selections
   const handleFileTypeSelect = (type: string) => {
@@ -39,6 +39,9 @@ export function CanvasToolbar() {
       default:
         setAcceptTypes("");
     }
+
+    // Close the popover
+    setIsPopoverOpen(false);
 
     // Trigger file input after a short delay to ensure accept attribute is updated
     setTimeout(() => {
@@ -82,7 +85,7 @@ export function CanvasToolbar() {
   };
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-2 bg-background/90 backdrop-blur-sm rounded-md border border-border">
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-2 bg-background/90 backdrop-blur-sm rounded-md border border-border">
       <Button
         variant="ghost"
         className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-normal"
@@ -95,7 +98,7 @@ export function CanvasToolbar() {
       <div className="h-6 w-px bg-border mx-0.5"></div>
 
       {/* File upload popover */}
-      <Popover>
+      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
