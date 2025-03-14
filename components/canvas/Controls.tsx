@@ -7,7 +7,8 @@ import { ModeToggle } from "../ui/mode-toggle";
 
 export function CanvasControls() {
   const { controls, canvas } = useCanvas();
-  const { zoomIn, zoomOut, resetView, togglePanMode } = controls;
+  const { zoomIn, zoomOut, resetView, togglePanMode, resetToDefaultView } =
+    controls;
   const { panMode, scale } = canvas.viewport;
 
   return (
@@ -19,7 +20,7 @@ export function CanvasControls() {
 
         <div
           className="min-w-[4.5rem] px-2 text-center text-sm cursor-pointer"
-          onClick={resetView}
+          onClick={resetToDefaultView}
           title="Reset Zoom"
         >
           {Math.round(scale * 100)}%

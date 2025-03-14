@@ -93,17 +93,16 @@ export function useCanvas() {
     }));
   }, [nodes, setViewport]);
 
+  const resetToDefaultView = useCallback(() => {
+    setViewport((prev) => ({
+      ...prev,
+      scale: 1,
+    }));
+  }, [setViewport]);
+
   // Handle wheel zoom
   const handleWheel = useCallback(
     (e: WheelEvent) => {
-      // Ignore if not on the canvas
-      if (!(e.target instanceof HTMLDivElement)) {
-        if (e.ctrlKey) {
-          e.preventDefault(); // Prevent browser zoom
-        }
-        return;
-      }
-
       e.preventDefault();
 
       if (viewport.isPanning) return;
@@ -530,6 +529,7 @@ export function useCanvas() {
       zoomIn,
       zoomOut,
       resetView,
+      resetToDefaultView,
       togglePanMode,
       addTextNode,
       addFileNode,

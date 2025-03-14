@@ -12,9 +12,9 @@ import {
   MaximizeIcon,
 } from "lucide-react";
 import { Button } from "../ui/button";
-import { motion } from "motion/react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import { motion } from "framer-motion";
 const FileNodeContent = dynamic(
   () => import("./FileNode").then((mod) => mod.FileNodeContent),
   {
@@ -43,19 +43,13 @@ function CanvasNode({ node }: { node: Node }) {
   const {
     canvas: { viewport },
     dragHandlers: { startNodeDrag },
-    controls: { deleteNode, updateNode },
+    controls: { deleteNode, updateNode, resetToDefaultView, resetView },
   } = useCanvas();
 
   const isSelected = viewport.selectedNodeId === node.id;
   const isLastSelected = viewport.lastSelectedNodeId === node.id;
   const isPanMode = viewport.panMode;
   const [isExpanded, setIsExpanded] = useState(false);
-
-  // Calculate screen coordinates when expanded, with 2rem padding
-  const expandedPosition = {
-    left: isExpanded ? -viewport.panOffsetX / viewport.scale + 16 : node.x, // 2rem = 32px
-    top: isExpanded ? -viewport.panOffsetY / viewport.scale + 72 : node.y,
-  };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -91,20 +85,7 @@ function CanvasNode({ node }: { node: Node }) {
 
   return (
     <motion.div
-      initial={false}
       draggable={false}
-      animate={{
-        width: isExpanded ? "calc(100vw - 2rem)" : node.width,
-        height: isExpanded ? "calc(100vh - 5.6rem)" : node.height,
-        left: expandedPosition.left,
-        top: expandedPosition.top,
-      }}
-      transition={{
-        width: { duration: 0.3 },
-        height: { duration: 0.3 },
-        left: { duration: isExpanded || !viewport.isDragging ? 0.3 : 0 },
-        top: { duration: isExpanded || !viewport.isDragging ? 0.3 : 0 },
-      }}
       className={cn(
         "absolute group rounded-md border-2 border-primary-light bg-background flex flex-col",
         !isPanMode && "hover:shadow-sm",
@@ -116,6 +97,29 @@ function CanvasNode({ node }: { node: Node }) {
         zIndex: isExpanded ? 50 : isLastSelected ? 10 : "auto",
         maxWidth: isExpanded ? "none" : NODE_CONSTANTS.MAX_NODE_WIDTH,
         maxHeight: isExpanded ? "none" : NODE_CONSTANTS.MAX_NODE_HEIGHT,
+      }}
+      initial={false}
+      animate={
+        isExpanded
+          ? {
+              left: -viewport.panOffsetX / viewport.scale + 16,
+              top: -viewport.panOffsetY / viewport.scale + 72,
+              height: "calc(100vh - 5.6rem)",
+              width: "calc(100vw - 2rem)",
+            }
+          : {
+              left: node.x,
+              top: node.y,
+              height: "fit-content",
+              width: "fit-content",
+            }
+      }
+      transition={{
+        type: "spring",
+        stiffness: 250,
+        damping: 35,
+        mass: 1.2,
+        duration: viewport.isDragging || viewport.isPanning ? 0 : 0.4,
       }}
     >
       <div
@@ -157,7 +161,15 @@ function CanvasNode({ node }: { node: Node }) {
             variant={"ghost"}
             size={"icon"}
             className={cn(isPanMode && "invisible")}
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => {
+              // if (isExpanded) {
+              //   resetView();
+              // } else {
+              //   resetToDefaultView();
+              // }
+              resetToDefaultView();
+              setIsExpanded(!isExpanded);
+            }}
             title="Expand node"
           >
             <MaximizeIcon />
