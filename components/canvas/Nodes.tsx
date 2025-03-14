@@ -2,6 +2,7 @@
 import { useCanvas } from "./useCanvas";
 import { FileNode, Node, StickyNode, TextNode } from "./types";
 import { cn } from "@/lib/utils";
+import { NODE_CONSTANTS } from "./constants";
 import {
   FileIcon,
   StickyNoteIcon,
@@ -66,13 +67,19 @@ function CanvasNode({ node }: { node: Node }) {
       style={{
         left: node.x,
         top: node.y,
-        width: node.width,
-        height: node.height,
+        minWidth: node.width,
+        minHeight: node.height,
+        width: "fit-content",
+        height: "fit-content",
+        maxWidth: NODE_CONSTANTS.MAX_NODE_WIDTH,
+        maxHeight: NODE_CONSTANTS.MAX_NODE_HEIGHT,
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <div
         className={cn(
-          "flex items-center justify-between p-0.5 border-b",
+          "flex items-center justify-between p-0.5 border-b shrink-0",
           !isPanMode && "cursor-grab active:cursor-grabbing"
         )}
         onMouseDown={(e) => !isPanMode && startNodeDrag(e, node.id)}
@@ -105,7 +112,7 @@ function CanvasNode({ node }: { node: Node }) {
           </Button>
         )}
       </div>
-      <div className="p-2 h-[calc(100%-2.5rem)] overflow-auto">
+      <div className="p-2 overflow-auto flex-1 max-h-[calc(400px-2.5rem)]">
         {node.type === "text" && <TextNodeContent node={node as TextNode} />}
         {node.type === "file" && <FileNodeContent node={node as FileNode} />}
         {node.type === "sticky" && (

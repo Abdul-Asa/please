@@ -346,7 +346,7 @@ export function useCanvas() {
       x: position.x,
       y: position.y,
       width: NODE_CONSTANTS.TEXT_NODE_WIDTH,
-      height: NODE_CONSTANTS.MIN_HEIGHT,
+      height: NODE_CONSTANTS.NODE_HEIGHT,
     };
 
     setNodes((prev) => [...prev, newNode]);
@@ -369,7 +369,7 @@ export function useCanvas() {
         x: position.x,
         y: position.y,
         width: NODE_CONSTANTS.FILE_NODE_WIDTH,
-        height: NODE_CONSTANTS.MIN_HEIGHT,
+        height: NODE_CONSTANTS.NODE_HEIGHT,
         fileType: fileType,
       };
 
@@ -410,7 +410,7 @@ export function useCanvas() {
       x: position.x,
       y: position.y,
       width: NODE_CONSTANTS.STICKY_NODE_WIDTH,
-      height: NODE_CONSTANTS.STICKY_NODE_WIDTH,
+      height: NODE_CONSTANTS.NODE_HEIGHT,
     };
 
     setNodes((prev) => [...prev, newNode]);

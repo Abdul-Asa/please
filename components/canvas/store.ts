@@ -23,13 +23,11 @@ export interface FileContent {
 
 // Define the database
 export class CanvasDatabase extends Dexie {
-  nodes!: Dexie.Table<Node, string>;
   fileContents!: Dexie.Table<FileContent, string>;
 
   constructor() {
     super("canvas-store");
     this.version(1).stores({
-      nodes: "id, type, file, label",
       fileContents: "id, name, type, size, lastModified",
     });
   }
