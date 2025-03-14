@@ -13,7 +13,7 @@ import {
   NODE_CONSTANTS,
   defaultViewport,
 } from "./constants";
-import type { Node, FileNode, FileType } from "./types";
+import type { Node, FileNode, FileType, Viewport } from "./types";
 import { CanvasContext } from "./Context";
 import { nanoid } from "nanoid";
 import { readFileContent } from "./utils";
@@ -105,7 +105,7 @@ export function useCanvas() {
     (e: WheelEvent) => {
       e.preventDefault();
 
-      if (viewport.isPanning) return;
+      if (viewport.isPanning || viewport.expandedNodeId) return;
 
       // Handle pinch-zoom (trackpad or Ctrl+wheel)
       if (e.ctrlKey || e.metaKey) {
@@ -167,6 +167,7 @@ export function useCanvas() {
     setViewport((prev) => ({
       ...prev,
       panMode: !prev.panMode,
+      expandedNodeId: "",
     }));
   }, [setViewport]);
 
@@ -332,6 +333,10 @@ export function useCanvas() {
         node.id === nodeId ? ({ ...node, ...update } as Node) : node
       )
     );
+  }, []);
+
+  const updateViewport = useCallback((update: Partial<Viewport>) => {
+    setViewport((prev) => ({ ...prev, ...update }));
   }, []);
 
   // Node creation
@@ -536,6 +541,7 @@ export function useCanvas() {
       addStickyNode,
       deleteNode,
       updateNode,
+      updateViewport,
     },
     dragHandlers: {
       startNodeDrag,

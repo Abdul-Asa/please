@@ -52,9 +52,9 @@ function CanvasContent() {
         )}
         <CanvasControls />
         <CanvasToolbar />
-        <div className="absolute left-0 bottom-0 p-4 size-[400px] overflow-scroll pointer-events-none">
+        {/* <div className="absolute left-0 bottom-0 p-4 size-[400px] overflow-scroll pointer-events-none">
           <pre>{JSON.stringify(canvas.nodes, null, 2)}</pre>
-        </div>
+        </div> */}
       </div>
     </div>
   );

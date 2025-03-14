@@ -43,13 +43,13 @@ function CanvasNode({ node }: { node: Node }) {
   const {
     canvas: { viewport },
     dragHandlers: { startNodeDrag },
-    controls: { deleteNode, updateNode, resetToDefaultView, resetView },
+    controls: { deleteNode, updateNode, resetToDefaultView, updateViewport },
   } = useCanvas();
 
   const isSelected = viewport.selectedNodeId === node.id;
   const isLastSelected = viewport.lastSelectedNodeId === node.id;
   const isPanMode = viewport.panMode;
-  const [isExpanded, setIsExpanded] = useState(false);
+  const isExpanded = viewport.expandedNodeId === node.id;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -83,8 +83,17 @@ function CanvasNode({ node }: { node: Node }) {
     }
   };
 
+  const selectText = (e: React.MouseEvent) => {
+    const selection = window.getSelection();
+    if (!selection) return;
+    const startNode = selection.getRangeAt(0).startContainer.parentNode;
+    const endNode = selection.getRangeAt(0).endContainer.parentNode;
+    console.log(selection.toString());
+  };
+
   return (
     <motion.div
+      onPointerUp={selectText}
       draggable={false}
       className={cn(
         "absolute group rounded-md border-2 border-primary-light bg-background flex flex-col",
@@ -162,13 +171,12 @@ function CanvasNode({ node }: { node: Node }) {
             size={"icon"}
             className={cn(isPanMode && "invisible")}
             onClick={() => {
-              // if (isExpanded) {
-              //   resetView();
-              // } else {
-              //   resetToDefaultView();
-              // }
               resetToDefaultView();
-              setIsExpanded(!isExpanded);
+              if (isExpanded) {
+                updateViewport({ expandedNodeId: "" });
+              } else {
+                updateViewport({ expandedNodeId: node.id });
+              }
             }}
             title="Expand node"
           >

@@ -74,6 +74,7 @@ export interface Viewport {
   isPanning: boolean;
   selectedNodeId: string;
   lastSelectedNodeId: string;
+  expandedNodeId: string;
   panMode: boolean;
   dragState: {
     startX: number;

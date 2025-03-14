@@ -27,6 +27,7 @@ export const defaultViewport: Viewport = {
   isPanning: false,
   selectedNodeId: "",
   lastSelectedNodeId: "",
+  expandedNodeId: "",
   panMode: false,
   dragState: {
     startX: 0,
