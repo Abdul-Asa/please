@@ -324,8 +324,8 @@ export function useCanvas() {
     const visibleTop = -viewport.panOffsetY / viewport.scale;
 
     // Add padding from edges (10% of visible area)
-    const paddingX = visibleWidth * 0.1;
-    const paddingY = visibleHeight * 0.1;
+    const paddingX = (visibleWidth * 0.1) / 2;
+    const paddingY = (visibleHeight * 0.1) / 2;
 
     // Generate random position within visible area with padding
     return {

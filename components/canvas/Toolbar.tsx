@@ -28,7 +28,7 @@ export function CanvasToolbar() {
   const handleFileTypeSelect = (type: string) => {
     switch (type) {
       case "text":
-        setAcceptTypes(".txt,.doc,.docx,.rtf");
+        setAcceptTypes(".txt,.docx,.md");
         break;
       case "pdf":
         setAcceptTypes(".pdf");

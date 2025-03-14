@@ -1,25 +1,59 @@
 import { Direction, Point } from "./types";
+import mammoth from "mammoth";
+import { marked } from "marked";
 
-export const readFileContent = (file: File): Promise<string | ArrayBuffer> => {
+export const readFileContent = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
+    const extension = file.name.split(".").pop()?.toLowerCase();
 
-    // Determine how to read the file based on its type
     if (file.type.startsWith("image/")) {
-      reader.readAsDataURL(file); // Read images as data URL
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        resolve(dataUrl);
+      };
+    } else if (file.type.startsWith("text/")) {
+      reader.readAsText(file);
+      reader.onload = () => {
+        const text = reader.result as string;
+        const html = text
+          .split("\n")
+          .map((line) => `<p>${line}</p>`)
+          .join("");
+        resolve(html);
+      };
     } else if (
-      file.type.startsWith("text/") ||
-      file.type === "application/json" ||
-      file.type === "application/xml" ||
-      file.type === "application/javascript" ||
-      file.type.includes("document")
+      extension === "docx" ||
+      file.type.startsWith(
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      )
     ) {
-      reader.readAsText(file); // Read text files as text
+      reader.readAsArrayBuffer(file);
+      reader.onload = async () => {
+        try {
+          const arrayBuffer = reader.result as ArrayBuffer;
+          const result = await mammoth.convertToHtml({ arrayBuffer });
+          resolve(result.value);
+        } catch (error) {
+          reject(error);
+        }
+      };
+    } else if (extension === "md") {
+      reader.readAsText(file);
+      reader.onload = () => {
+        const markdown = reader.result as string;
+        const html = marked(markdown);
+        resolve(html);
+      };
     } else {
-      reader.readAsArrayBuffer(file); // Read other files as binary
+      reader.readAsText(file);
+      reader.onload = () => {
+        const text = reader.result as string;
+        resolve(text);
+      };
     }
 
-    reader.onload = () => resolve(reader.result as string | ArrayBuffer);
     reader.onerror = (error) => reject(error);
   });
 };
