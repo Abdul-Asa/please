@@ -31,7 +31,6 @@ export function useCanvas() {
   const [nodes, setNodes] = useAtom(nodesAtom);
   const [edges, setEdges] = useAtom(edgesAtom);
   const [viewport, setViewport] = useAtom(viewportAtom);
-  const [isSpacePressed, setIsSpacePressed] = useState(false);
 
   // Zoom functions
   const zoomIn = useCallback(() => {
@@ -97,16 +96,28 @@ export function useCanvas() {
   // Handle wheel zoom
   const handleWheel = useCallback(
     (e: WheelEvent) => {
+      // Ignore if not on the canvas
+      if (!(e.target instanceof HTMLDivElement)) {
+        if (e.ctrlKey) {
+          e.preventDefault(); // Prevent browser zoom
+        }
+        return;
+      }
+
+      e.preventDefault();
+
+      if (viewport.isPanning) return;
+
+      // Handle pinch-zoom (trackpad or Ctrl+wheel)
       if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        const delta = e.deltaY;
-        const direction = delta > 0 ? -1 : 1;
-        const factor = Math.pow(1.1, direction);
+        // Use deltaY for pinch gestures (more natural on trackpads)
+        const delta = -e.deltaY;
 
         setViewport((prev) => {
-          // Calculate new scale
+          // Use a smaller zoom factor for smoother trackpad pinch
+          const zoomFactor = Math.exp(delta * 0.01);
           const newScale = Math.min(
-            Math.max(prev.scale * factor, MIN_SCALE),
+            Math.max(prev.scale * zoomFactor, MIN_SCALE),
             MAX_SCALE
           );
 
@@ -119,7 +130,6 @@ export function useCanvas() {
           const mouseX = e.clientX - rect.left;
           const mouseY = e.clientY - rect.top;
 
-          // Calculate new offsets to zoom into mouse position
           const zoomPoint = {
             x: (mouseX - prev.panOffsetX) / prev.scale,
             y: (mouseY - prev.panOffsetY) / prev.scale,
@@ -135,9 +145,20 @@ export function useCanvas() {
             panOffsetY: newOffsetY,
           };
         });
+        return;
       }
+
+      // Handle regular scrolling (two-finger pan on trackpad)
+      const deltaX = e.deltaX;
+      const deltaY = e.deltaY;
+
+      setViewport((prev) => ({
+        ...prev,
+        panOffsetX: prev.panOffsetX - deltaX,
+        panOffsetY: prev.panOffsetY - deltaY,
+      }));
     },
-    [setViewport]
+    [viewport.isPanning, setViewport]
   );
 
   // Handle panning
@@ -152,8 +173,7 @@ export function useCanvas() {
 
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
-      // Allow panning when either space is pressed or panMode is active
-      if ((!isSpacePressed && !viewport.panMode) || e.button !== 0) return;
+      if (e.button !== 0 || !viewport.panMode) return; // Only handle left click and when pan mode is active
 
       setViewport((prev) => ({
         ...prev,
@@ -162,7 +182,7 @@ export function useCanvas() {
         panStartY: e.clientY - prev.panOffsetY,
       }));
     },
-    [isSpacePressed, viewport.panMode, setViewport]
+    [viewport.panMode, setViewport]
   );
 
   const handleMouseMove = useCallback(
@@ -192,37 +212,43 @@ export function useCanvas() {
     }));
   }, [setViewport]);
 
-  // Handle space key for panning
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.code === "Space" && !e.repeat) {
-        e.preventDefault();
-        setIsSpacePressed(true);
+  // Add touch event handlers for mobile support
+  const handleTouchStart = useCallback(
+    (e: TouchEvent) => {
+      if (e.touches.length !== 1) return; // Only handle single touch
 
-        if (!viewport.panMode) {
-          canvasRef.current?.classList.add("will-pan");
-        }
-      }
+      const touch = e.touches[0];
+      setViewport((prev) => ({
+        ...prev,
+        isPanning: true,
+        panStartX: touch.clientX - prev.panOffsetX,
+        panStartY: touch.clientY - prev.panOffsetY,
+      }));
     },
-    [viewport.panMode]
+    [setViewport]
   );
 
-  const handleKeyUp = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.code === "Space") {
-        setIsSpacePressed(false);
-        setViewport((prev) => ({
-          ...prev,
-          isPanning: false,
-        }));
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      e.preventDefault();
+      if (!viewport.isPanning || e.touches.length !== 1) return;
 
-        if (!viewport.panMode) {
-          canvasRef.current?.classList.remove("will-pan");
-        }
-      }
+      const touch = e.touches[0];
+      setViewport((prev) => ({
+        ...prev,
+        panOffsetX: touch.clientX - prev.panStartX,
+        panOffsetY: touch.clientY - prev.panStartY,
+      }));
     },
-    [viewport.panMode, setViewport]
+    [viewport.isPanning, setViewport]
   );
+
+  const handleTouchEnd = useCallback(() => {
+    setViewport((prev) => ({
+      ...prev,
+      isPanning: false,
+    }));
+  }, [setViewport]);
 
   // Handle node drag
   const startNodeDrag = useCallback(
@@ -280,40 +306,7 @@ export function useCanvas() {
     [viewport, setNodes]
   );
 
-  // Delete node function
-  const deleteNode = useCallback(
-    (nodeId: string) => {
-      // Get the node before deleting it
-      const nodeToDelete = nodes.find((node) => node.id === nodeId);
-
-      // Delete the node from the nodes array
-      setNodes((prevNodes) => prevNodes.filter((node) => node.id !== nodeId));
-
-      // If it's a file node, also delete the file content from IndexedDB
-      if (nodeToDelete?.type === "file") {
-        deleteFileContent(nodeId).catch((err) =>
-          console.error("Failed to delete file content:", err)
-        );
-      }
-
-      // Clear selection if the deleted node was selected
-      if (
-        viewport.selectedNodeId === nodeId ||
-        viewport.lastSelectedNodeId === nodeId
-      ) {
-        setViewport((prev) => ({
-          ...prev,
-          selectedNodeId:
-            prev.selectedNodeId === nodeId ? "" : prev.selectedNodeId,
-          lastSelectedNodeId:
-            prev.lastSelectedNodeId === nodeId ? "" : prev.lastSelectedNodeId,
-        }));
-      }
-    },
-    [nodes, setNodes, viewport, setViewport]
-  );
-
-  // Helper function to get random position within visible canvas
+  // Get random position within visible canvas
   const getRandomPositionInViewport = useCallback(() => {
     // Calculate visible canvas area
     const visibleWidth = window.innerWidth / viewport.scale;
@@ -334,7 +327,15 @@ export function useCanvas() {
     };
   }, [viewport]);
 
-  // Node creation functions
+  const updateNode = useCallback((nodeId: string, update: Partial<Node>) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId ? ({ ...node, ...update } as Node) : node
+      )
+    );
+  }, []);
+
+  // Node creation
   const addTextNode = useCallback(() => {
     const position = getRandomPositionInViewport();
 
@@ -353,7 +354,6 @@ export function useCanvas() {
     return newNode;
   }, [getRandomPositionInViewport, setNodes]);
 
-  // Updated file node creation with file upload handling
   const addFileNode = useCallback(
     async (file: File, fileType: FileType) => {
       const position = getRandomPositionInViewport();
@@ -417,6 +417,37 @@ export function useCanvas() {
     return newNode;
   }, [getRandomPositionInViewport, setNodes]);
 
+  const deleteNode = useCallback(
+    (nodeId: string) => {
+      // Get the node before deleting it
+      const nodeToDelete = nodes.find((node) => node.id === nodeId);
+
+      // Delete the node from the nodes array
+      setNodes((prevNodes) => prevNodes.filter((node) => node.id !== nodeId));
+
+      // If it's a file node, also delete the file content from IndexedDB
+      if (nodeToDelete?.type === "file") {
+        deleteFileContent(nodeId).catch((err) =>
+          console.error("Failed to delete file content:", err)
+        );
+      }
+
+      // Clear selection if the deleted node was selected
+      if (
+        viewport.selectedNodeId === nodeId ||
+        viewport.lastSelectedNodeId === nodeId
+      ) {
+        setViewport((prev) => ({
+          ...prev,
+          selectedNodeId:
+            prev.selectedNodeId === nodeId ? "" : prev.selectedNodeId,
+          lastSelectedNodeId:
+            prev.lastSelectedNodeId === nodeId ? "" : prev.lastSelectedNodeId,
+        }));
+      }
+    },
+    [nodes, setNodes, viewport, setViewport]
+  );
   // Initialize the canvas
   useEffect(() => {
     if (initialData) {
@@ -439,33 +470,40 @@ export function useCanvas() {
     }
   }, [viewport.panMode]);
 
-  // Set up event listeners
+  // Update the event listeners
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    canvas.addEventListener("wheel", handleWheel, { passive: false });
-    canvas.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    canvas.addEventListener("wheel", handleWheel);
+    canvas.addEventListener("pointerdown", handleMouseDown);
+    window.addEventListener("pointermove", handleMouseMove);
+    window.addEventListener("pointerup", handleMouseUp);
+    if ("ontouchstart" in window) {
+      canvas.addEventListener("touchstart", handleTouchStart);
+      canvas.addEventListener("touchmove", handleTouchMove);
+      window.addEventListener("touchend", handleTouchEnd);
+    }
 
     return () => {
       canvas.removeEventListener("wheel", handleWheel);
-      canvas.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      canvas.removeEventListener("pointerdown", handleMouseDown);
+      window.removeEventListener("pointermove", handleMouseMove);
+      window.removeEventListener("pointerup", handleMouseUp);
+      if ("ontouchstart" in window) {
+        canvas.removeEventListener("touchstart", handleTouchStart);
+        canvas.removeEventListener("touchmove", handleTouchMove);
+        window.removeEventListener("touchend", handleTouchEnd);
+      }
     };
   }, [
     handleWheel,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    handleKeyDown,
-    handleKeyUp,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
   ]);
 
   // Separate effect for drag handling
@@ -497,6 +535,7 @@ export function useCanvas() {
       addFileNode,
       addStickyNode,
       deleteNode,
+      updateNode,
     },
     dragHandlers: {
       startNodeDrag,

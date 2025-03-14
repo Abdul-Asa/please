@@ -9,10 +9,12 @@ import {
   TypeIcon,
   Trash2Icon,
   ImageIcon,
+  MaximizeIcon,
 } from "lucide-react";
 import { Button } from "../ui/button";
+import { motion } from "motion/react";
 import dynamic from "next/dynamic";
-
+import { useState } from "react";
 const FileNodeContent = dynamic(
   () => import("./FileNode").then((mod) => mod.FileNodeContent),
   {
@@ -41,12 +43,19 @@ function CanvasNode({ node }: { node: Node }) {
   const {
     canvas: { viewport },
     dragHandlers: { startNodeDrag },
-    controls: { deleteNode },
+    controls: { deleteNode, updateNode },
   } = useCanvas();
 
   const isSelected = viewport.selectedNodeId === node.id;
   const isLastSelected = viewport.lastSelectedNodeId === node.id;
   const isPanMode = viewport.panMode;
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Calculate screen coordinates when expanded, with 2rem padding
+  const expandedPosition = {
+    left: isExpanded ? -viewport.panOffsetX / viewport.scale + 16 : node.x, // 2rem = 32px
+    top: isExpanded ? -viewport.panOffsetY / viewport.scale + 72 : node.y,
+  };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -54,27 +63,59 @@ function CanvasNode({ node }: { node: Node }) {
     deleteNode(node.id);
   };
 
+  const handleLabelChange = (e: React.FocusEvent<HTMLSpanElement>) => {
+    const newLabel = e.currentTarget.textContent?.trim();
+    if (!newLabel) {
+      // Reset to original label if empty
+      e.currentTarget.textContent = node.label || node.type;
+      return;
+    }
+    if (newLabel !== node.label) {
+      updateNode(node.id, { label: newLabel });
+    }
+  };
+
+  const handleLabelKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
+    e.stopPropagation();
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const content = e.currentTarget.textContent?.trim();
+      if (!content) {
+        // Reset to original label if empty
+        e.currentTarget.textContent = node.label || node.type;
+      }
+      e.currentTarget.blur();
+    }
+  };
+
   return (
-    <div
+    <motion.div
+      initial={false}
       draggable={false}
+      animate={{
+        width: isExpanded ? "calc(100vw - 2rem)" : node.width,
+        height: isExpanded ? "calc(100vh - 5.6rem)" : node.height,
+        left: expandedPosition.left,
+        top: expandedPosition.top,
+      }}
+      transition={{
+        width: { duration: 0.3 },
+        height: { duration: 0.3 },
+        left: { duration: isExpanded || !viewport.isDragging ? 0.3 : 0 },
+        top: { duration: isExpanded || !viewport.isDragging ? 0.3 : 0 },
+      }}
       className={cn(
-        "absolute rounded-md border-2 border-primary-light bg-background",
+        "absolute group rounded-md border-2 border-primary-light bg-background flex flex-col",
         !isPanMode && "hover:shadow-sm",
-        isSelected && "border-ring",
-        isLastSelected && "z-10",
-        "group"
+        isSelected && "border-ring"
       )}
       style={{
-        left: node.x,
-        top: node.y,
         minWidth: node.width,
         minHeight: node.height,
-        width: "fit-content",
-        height: "fit-content",
-        maxWidth: NODE_CONSTANTS.MAX_NODE_WIDTH,
-        maxHeight: NODE_CONSTANTS.MAX_NODE_HEIGHT,
-        display: "flex",
-        flexDirection: "column",
+        zIndex: isExpanded ? 50 : isLastSelected ? 10 : "auto",
+        maxWidth: isExpanded ? "none" : NODE_CONSTANTS.MAX_NODE_WIDTH,
+        maxHeight: isExpanded ? "none" : NODE_CONSTANTS.MAX_NODE_HEIGHT,
       }}
     >
       <div
@@ -96,21 +137,44 @@ function CanvasNode({ node }: { node: Node }) {
             <StickyNoteIcon size={16} className="mx-2" />
           )}
           <div className="h-6 w-px bg-border mx-0.5"></div>
-          <div className="flex items-center ml-2 gap-2">
-            <p className="text-sm font-medium">{node.label || node.type}</p>
+          <div className="flex items-center ml-2 gap-2 max-w-[200px]">
+            <span
+              contentEditable={!isPanMode}
+              suppressContentEditableWarning
+              onBlur={handleLabelChange}
+              onKeyDown={handleLabelKeyDown}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+              }}
+              className="text-sm line-clamp-1 w-full font-medium cursor-text outline-none focus:border-b border-ring px-1"
+            >
+              {node.label || node.type}
+            </span>
           </div>
         </div>
-        {!isPanMode && (
+        <div className="flex items-center">
           <Button
             variant={"ghost"}
             size={"icon"}
-            className="hover:text-destructive/80"
+            className={cn(isPanMode && "invisible")}
+            onClick={() => setIsExpanded(!isExpanded)}
+            title="Expand node"
+          >
+            <MaximizeIcon />
+          </Button>
+          <Button
+            variant={"ghost"}
+            size={"icon"}
+            className={cn(
+              "hover:text-destructive/80",
+              isPanMode && "invisible"
+            )}
             onClick={handleDelete}
             title="Delete node"
           >
             <Trash2Icon />
           </Button>
-        )}
+        </div>
       </div>
       <div className="p-2 overflow-auto flex-1 max-h-[calc(400px-2.5rem)]">
         {node.type === "text" && <TextNodeContent node={node as TextNode} />}
@@ -119,7 +183,7 @@ function CanvasNode({ node }: { node: Node }) {
           <StickyNodeContent node={node as StickyNode} />
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
