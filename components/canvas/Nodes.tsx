@@ -83,17 +83,17 @@ function CanvasNode({ node }: { node: Node }) {
     }
   };
 
-  const selectText = (e: React.MouseEvent) => {
-    const selection = window.getSelection();
-    if (!selection) return;
-    const startNode = selection.getRangeAt(0).startContainer.parentNode;
-    const endNode = selection.getRangeAt(0).endContainer.parentNode;
-    console.log(selection.toString());
-  };
+  // const selectText = (e: React.MouseEvent) => {
+  //   const selection = window.getSelection();
+  //   if (!selection) return;
+  //   const startNode = selection.getRangeAt(0).startContainer.parentNode;
+  //   const endNode = selection.getRangeAt(0).endContainer.parentNode;
+  //   console.log(selection.toString());
+  // };
 
   return (
     <motion.div
-      onPointerUp={selectText}
+      // onPointerUp={selectText}
       draggable={false}
       className={cn(
         "absolute group rounded-md border-2 border-primary-light bg-background flex flex-col",

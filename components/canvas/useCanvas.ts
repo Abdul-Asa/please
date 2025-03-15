@@ -105,7 +105,7 @@ export function useCanvas() {
     (e: WheelEvent) => {
       e.preventDefault();
 
-      if (viewport.isPanning || viewport.expandedNodeId) return;
+      if (viewport.panMode || viewport.expandedNodeId !== "") return;
 
       // Handle pinch-zoom (trackpad or Ctrl+wheel)
       if (e.ctrlKey || e.metaKey) {
@@ -157,7 +157,7 @@ export function useCanvas() {
         panOffsetY: prev.panOffsetY - deltaY,
       }));
     },
-    [viewport.isPanning, setViewport]
+    [viewport, setViewport]
   );
 
   // Handle panning

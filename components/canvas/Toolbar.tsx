@@ -85,14 +85,14 @@ export function CanvasToolbar() {
   };
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-2 bg-background/90 backdrop-blur-sm rounded-md border border-border">
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-2 bg-background/90 backdrop-blur-sm rounded-md border border-border max-w-[95%] overflow-x-auto">
       <Button
         variant="ghost"
-        className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-normal"
+        className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-normal whitespace-nowrap"
         onClick={addTextNode}
       >
         <TypeIcon size={18} />
-        <span>Text</span>
+        <span className="md:inline hidden">Text</span>
       </Button>
 
       <div className="h-6 w-px bg-border mx-0.5"></div>
@@ -102,10 +102,10 @@ export function CanvasToolbar() {
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-normal"
+            className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-normal whitespace-nowrap"
           >
             <UploadIcon size={18} />
-            <span>Upload</span>
+            <span className="md:inline hidden">Upload</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-48 p-2">
@@ -152,11 +152,11 @@ export function CanvasToolbar() {
 
       <Button
         variant="ghost"
-        className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-normal"
+        className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-normal whitespace-nowrap"
         onClick={addStickyNode}
       >
         <StickyNoteIcon size={18} />
-        <span>Note</span>
+        <span className="md:inline hidden">Note</span>
       </Button>
     </div>
   );
