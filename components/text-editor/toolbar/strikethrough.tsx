@@ -9,7 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/packages/utils";
+import { cn } from "@/lib/utils";
 import { useToolbar } from "@/components/text-editor/toolbar/toolbar-provider";
 
 const StrikeThroughToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(

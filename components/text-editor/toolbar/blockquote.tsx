@@ -9,9 +9,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/packages/utils";
 import { useToolbar } from "@/components/text-editor/toolbar/toolbar-provider";
-
+import { cn } from "@/lib/utils";
 const BlockquoteToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, onClick, children, ...props }, ref) => {
     const { editor } = useToolbar();

@@ -103,8 +103,10 @@ export function useCanvas() {
   // Handle wheel zoom
   const handleWheel = useCallback(
     (e: WheelEvent) => {
+      if (e.target instanceof HTMLElement && e.target.id !== "canvas") {
+        return;
+      }
       e.preventDefault();
-
       if (viewport.panMode || viewport.expandedNodeId !== "") return;
 
       // Handle pinch-zoom (trackpad or Ctrl+wheel)

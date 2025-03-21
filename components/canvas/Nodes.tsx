@@ -15,6 +15,7 @@ import { Button } from "../ui/button";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Editor } from "../text-editor";
 const FileNodeContent = dynamic(
   () => import("./FileNode").then((mod) => mod.FileNodeContent),
   {
@@ -96,7 +97,7 @@ function CanvasNode({ node }: { node: Node }) {
       // onPointerUp={selectText}
       draggable={false}
       className={cn(
-        "absolute group rounded-md border-2 border-primary-light bg-background flex flex-col",
+        "absolute node group rounded-md border-2 border-primary-light bg-background flex flex-col",
         !isPanMode && "hover:shadow-sm",
         isSelected && "border-ring"
       )}
@@ -196,29 +197,82 @@ function CanvasNode({ node }: { node: Node }) {
           </Button>
         </div>
       </div>
-      <div className="p-2 overflow-auto flex-1 max-h-[calc(400px-2.5rem)]">
-        {node.type === "text" && <TextNodeContent node={node as TextNode} />}
-        {node.type === "file" && <FileNodeContent node={node as FileNode} />}
+      <div className=" overflow-auto flex-1 max-h-[calc(400px-2.5rem)]">
+        {node.type === "text" && (
+          <TextNodeContent node={node as TextNode} isExpanded={isExpanded} />
+        )}
+        {node.type === "file" && (
+          <FileNodeContent node={node as FileNode} isExpanded={isExpanded} />
+        )}
         {node.type === "sticky" && (
-          <StickyNodeContent node={node as StickyNode} />
+          <StickyNodeContent
+            node={node as StickyNode}
+            isExpanded={isExpanded}
+          />
         )}
       </div>
     </motion.div>
   );
 }
 
-function TextNodeContent({ node }: { node: TextNode }) {
+function TextNodeContent({
+  node,
+  isExpanded,
+}: {
+  node: TextNode;
+  isExpanded: boolean;
+}) {
+  const { controls } = useCanvas();
+
+  const handleContentChange = (newContent: string) => {
+    controls.updateNode(node.id, { text: newContent });
+  };
+
   return (
-    <div className="h-full">
-      <p>{node.text}</p>
+    <div className={cn("h-full w-full", isExpanded && "flex-1 flex flex-col")}>
+      {isExpanded ? (
+        <Editor
+          content={node.text}
+          onChange={handleContentChange}
+          className="flex-1 h-full"
+        />
+      ) : (
+        <div
+          className="p-2 prose prose-sm max-w-none overflow-auto max-h-[300px]"
+          dangerouslySetInnerHTML={{ __html: node.text }}
+        />
+      )}
     </div>
   );
 }
 
-function StickyNodeContent({ node }: { node: StickyNode }) {
+function StickyNodeContent({
+  node,
+  isExpanded,
+}: {
+  node: StickyNode;
+  isExpanded?: boolean;
+}) {
+  const { controls } = useCanvas();
+
+  const handleContentChange = (newContent: string) => {
+    controls.updateNode(node.id, { text: newContent });
+  };
+
   return (
-    <div className="h-full">
-      <p>{node.text}</p>
+    <div className={cn("h-full w-full", isExpanded && "flex-1 flex flex-col")}>
+      {isExpanded ? (
+        <Editor
+          content={node.text}
+          onChange={handleContentChange}
+          className="flex-1 h-full"
+        />
+      ) : (
+        <div
+          className="p-4 bg-yellow-50 h-full overflow-auto"
+          dangerouslySetInnerHTML={{ __html: node.text }}
+        />
+      )}
     </div>
   );
 }

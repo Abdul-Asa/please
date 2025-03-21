@@ -3,11 +3,20 @@ import { FileContent } from "./store";
 import { getFileContent } from "./store";
 import { FileNode } from "./types";
 import { useEffect, useState } from "react";
+import { Editor } from "../text-editor";
+import { useCanvas } from "./useCanvas";
 
-export function FileNodeContent({ node }: { node: FileNode }) {
+export function FileNodeContent({
+  node,
+  isExpanded = false,
+}: {
+  node: FileNode;
+  isExpanded?: boolean;
+}) {
   const [fileContent, setFileContent] = useState<FileContent | undefined>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { controls } = useCanvas();
 
   useEffect(() => {
     const fetchFileContent = async () => {
@@ -26,6 +35,19 @@ export function FileNodeContent({ node }: { node: FileNode }) {
 
     fetchFileContent();
   }, [node.id]);
+
+  const handleTextContentChange = (newContent: string) => {
+    if (fileContent?.type === "text") {
+      // Update the file content in the store
+      setFileContent({
+        ...fileContent,
+        content: newContent,
+      });
+
+      // If there's a need to save this to a backend or persistent storage,
+      // that would be implemented here
+    }
+  };
 
   if (loading) {
     return (
@@ -68,8 +90,18 @@ export function FileNodeContent({ node }: { node: FileNode }) {
 
   if (fileContent.type === "text") {
     return (
-      <div className="h-full overflow-auto whitespace-pre-wrap font-mono text-sm">
-        {fileContent.content as string}
+      <div className="h-full w-full">
+        {isExpanded ? (
+          <Editor
+            content={fileContent.content as string}
+            onChange={handleTextContentChange}
+          />
+        ) : (
+          <div
+            className="p-2 prose prose-sm max-w-none overflow-auto max-h-[300px]"
+            dangerouslySetInnerHTML={{ __html: fileContent.content as string }}
+          />
+        )}
       </div>
     );
   }
