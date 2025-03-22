@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { Button } from "../../ui/button";
 import dynamic from "next/dynamic";
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Editor } from "../../text-editor";
 const FileNodeContent = dynamic(
@@ -113,8 +112,8 @@ function CanvasNode({ node }: { node: Node }) {
         isExpanded
           ? {
               left: -viewport.panOffsetX / viewport.scale + 16,
-              top: -viewport.panOffsetY / viewport.scale + 72,
-              height: "calc(100vh - 5.6rem)",
+              top: -viewport.panOffsetY / viewport.scale + 16,
+              height: "calc(100vh - 2rem)",
               width: "calc(100vw - 2rem)",
             }
           : {

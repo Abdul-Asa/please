@@ -317,7 +317,7 @@ export function useCanvas() {
 
     const newNode: Node = {
       id: nanoid(),
-      label: "Untitled-" + nanoid(6),
+      label: "Text-" + nanoid(6),
       type: "text",
       text: "New text",
       x: position.x,
@@ -327,13 +327,17 @@ export function useCanvas() {
     };
 
     setNodes((prev) => [...prev, newNode]);
+    setViewport((prev) => ({
+      ...prev,
+      selectedNodeId: newNode.id,
+    }));
     return newNode;
   };
 
   const addFileNode = async (file: File, fileType: FileType) => {
     const position = getRandomPositionInViewport();
     const nodeId = nanoid();
-    const fileName = file.name || "Untitled file-" + nanoid(6);
+    const fileName = file.name || "File-" + nanoid(6);
 
     // Create the base node
     const newNode: FileNode = {
@@ -369,6 +373,10 @@ export function useCanvas() {
     }
 
     setNodes((prev) => [...prev, newNode]);
+    setViewport((prev) => ({
+      ...prev,
+      selectedNodeId: newNode.id,
+    }));
     return newNode;
   };
 
@@ -378,7 +386,7 @@ export function useCanvas() {
     const newNode: Node = {
       id: nanoid(),
       type: "sticky",
-      label: "New note-" + nanoid(6),
+      label: "Note-" + nanoid(6),
       text: "New note",
       x: position.x,
       y: position.y,
@@ -387,6 +395,10 @@ export function useCanvas() {
     };
 
     setNodes((prev) => [...prev, newNode]);
+    setViewport((prev) => ({
+      ...prev,
+      selectedNodeId: newNode.id,
+    }));
     return newNode;
   };
 
