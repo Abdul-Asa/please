@@ -9,7 +9,7 @@ import {
   FileImageIcon,
   FileIcon,
 } from "lucide-react";
-import { useCanvas } from "./useCanvas";
+import { useCanvas } from "../useCanvas";
 import { useRef, useState } from "react";
 import {
   Popover,

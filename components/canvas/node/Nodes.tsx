@@ -1,8 +1,8 @@
 "use client";
-import { useCanvas } from "./useCanvas";
-import { FileNode, Node, StickyNode, TextNode } from "./types";
+import { useCanvas } from "../useCanvas";
+import { FileNode, Node, StickyNode, TextNode } from "../types";
 import { cn } from "@/lib/utils";
-import { NODE_CONSTANTS } from "./constants";
+import { NODE_CONSTANTS } from "../constants";
 import {
   FileIcon,
   StickyNoteIcon,
@@ -11,11 +11,11 @@ import {
   ImageIcon,
   MaximizeIcon,
 } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Editor } from "../text-editor";
+import { Editor } from "../../text-editor";
 const FileNodeContent = dynamic(
   () => import("./FileNode").then((mod) => mod.FileNodeContent),
   {

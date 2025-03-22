@@ -1,27 +1,15 @@
 import { atomWithStorage } from "jotai/utils";
-import type { Node, Edge, Viewport } from "./types";
+import type { FileContent, Node, Viewport } from "./types";
 import { defaultViewport } from "./constants";
 import Dexie from "dexie";
-
 // Persistent atoms
 export const nodesAtom = atomWithStorage<Node[]>("nodes", []);
-export const edgesAtom = atomWithStorage<Edge[]>("edges", []);
 export const viewportAtom = atomWithStorage<Viewport>(
   "viewport",
   defaultViewport
 );
 
-// Define file content interface
-export interface FileContent {
-  id: string; // Same as the node id
-  name: string; // Original filename
-  type: string; // MIME type
-  content: string | ArrayBuffer; // File content as string or binary
-  size: number; // File size in bytes
-  lastModified: number; // Last modified timestamp
-}
-
-// Define the database
+// IndexedDB store
 export class CanvasDatabase extends Dexie {
   fileContents!: Dexie.Table<FileContent, string>;
 

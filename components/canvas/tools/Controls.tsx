@@ -1,9 +1,9 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, RotateCcw, Move, Box } from "lucide-react";
-import { useCanvas } from "./useCanvas";
+import { useCanvas } from "../useCanvas";
 import { cn } from "@/lib/utils";
-import { ModeToggle } from "../ui/mode-toggle";
+import { ModeToggle } from "@/components/ui/mode-toggle";
 
 export function CanvasControls() {
   const { controls, canvas } = useCanvas();

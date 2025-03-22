@@ -1,22 +1,20 @@
 import { useAtom } from "jotai";
-import { useContext, useRef, useCallback, useEffect, useState } from "react";
+import { useContext, useRef, useEffect, useState } from "react";
 import {
   nodesAtom,
-  edgesAtom,
   viewportAtom,
   storeFileContent,
   deleteFileContent,
-  FileContent,
 } from "./store";
 import {
   VIEWPORT_CONSTANTS,
   NODE_CONSTANTS,
   defaultViewport,
 } from "./constants";
-import type { Node, FileNode, FileType, Viewport } from "./types";
-import { CanvasContext } from "./Context";
+import type { Node, FileNode, FileType, Viewport, FileContent } from "./types";
 import { nanoid } from "nanoid";
 import { readFileContent } from "./utils";
+import { CanvasContext } from ".";
 const { MIN_SCALE, MAX_SCALE, ZOOM_BUTTON_FACTOR } = VIEWPORT_CONSTANTS;
 
 export function useCanvas() {
@@ -29,25 +27,24 @@ export function useCanvas() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
   const [nodes, setNodes] = useAtom(nodesAtom);
-  const [edges, setEdges] = useAtom(edgesAtom);
   const [viewport, setViewport] = useAtom(viewportAtom);
 
   // Zoom functions
-  const zoomIn = useCallback(() => {
+  const zoomIn = () => {
     setViewport((prev) => ({
       ...prev,
       scale: Math.min(prev.scale * ZOOM_BUTTON_FACTOR, MAX_SCALE),
     }));
-  }, [setViewport]);
+  };
 
-  const zoomOut = useCallback(() => {
+  const zoomOut = () => {
     setViewport((prev) => ({
       ...prev,
       scale: Math.max(prev.scale / ZOOM_BUTTON_FACTOR, MIN_SCALE),
     }));
-  }, [setViewport]);
+  };
 
-  const resetView = useCallback(() => {
+  const resetView = () => {
     // Find boundaries of all nodes
     let minX = Infinity;
     let maxX = -Infinity;
@@ -91,79 +88,76 @@ export function useCanvas() {
       isPanning: false,
       isDragging: false,
     }));
-  }, [nodes, setViewport]);
+  };
 
-  const resetToDefaultView = useCallback(() => {
+  const resetToDefaultView = () => {
     setViewport((prev) => ({
       ...prev,
       scale: 1,
     }));
-  }, [setViewport]);
+  };
 
   // Handle wheel zoom
-  const handleWheel = useCallback(
-    (e: WheelEvent) => {
-      if (e.target instanceof HTMLElement && e.target.id !== "canvas") {
-        return;
-      }
-      e.preventDefault();
-      if (viewport.panMode || viewport.expandedNodeId !== "") return;
+  const handleWheel = (e: WheelEvent) => {
+    if (e.target instanceof HTMLElement && e.target.id !== "canvas") {
+      return;
+    }
+    e.preventDefault();
+    if (viewport.panMode || viewport.expandedNodeId !== "") return;
 
-      // Handle pinch-zoom (trackpad or Ctrl+wheel)
-      if (e.ctrlKey || e.metaKey) {
-        // Use deltaY for pinch gestures (more natural on trackpads)
-        const delta = -e.deltaY;
+    // Handle pinch-zoom (trackpad or Ctrl+wheel)
+    if (e.ctrlKey || e.metaKey) {
+      // Use deltaY for pinch gestures (more natural on trackpads)
+      const delta = -e.deltaY;
 
-        setViewport((prev) => {
-          // Use a smaller zoom factor for smoother trackpad pinch
-          const zoomFactor = Math.exp(delta * 0.01);
-          const newScale = Math.min(
-            Math.max(prev.scale * zoomFactor, MIN_SCALE),
-            MAX_SCALE
-          );
+      setViewport((prev) => {
+        // Use a smaller zoom factor for smoother trackpad pinch
+        const zoomFactor = Math.exp(delta * 0.01);
+        const newScale = Math.min(
+          Math.max(prev.scale * zoomFactor, MIN_SCALE),
+          MAX_SCALE
+        );
 
-          if (newScale === prev.scale) return prev;
+        if (newScale === prev.scale) return prev;
 
-          // Calculate zoom center point
-          const rect = canvasRef.current?.getBoundingClientRect();
-          if (!rect) return { ...prev, scale: newScale };
+        // Calculate zoom center point
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (!rect) return { ...prev, scale: newScale };
 
-          const mouseX = e.clientX - rect.left;
-          const mouseY = e.clientY - rect.top;
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
 
-          const zoomPoint = {
-            x: (mouseX - prev.panOffsetX) / prev.scale,
-            y: (mouseY - prev.panOffsetY) / prev.scale,
-          };
+        const zoomPoint = {
+          x: (mouseX - prev.panOffsetX) / prev.scale,
+          y: (mouseY - prev.panOffsetY) / prev.scale,
+        };
 
-          const newOffsetX = mouseX - zoomPoint.x * newScale;
-          const newOffsetY = mouseY - zoomPoint.y * newScale;
+        const newOffsetX = mouseX - zoomPoint.x * newScale;
+        const newOffsetY = mouseY - zoomPoint.y * newScale;
 
-          return {
-            ...prev,
-            scale: newScale,
-            panOffsetX: newOffsetX,
-            panOffsetY: newOffsetY,
-          };
-        });
-        return;
-      }
+        return {
+          ...prev,
+          scale: newScale,
+          panOffsetX: newOffsetX,
+          panOffsetY: newOffsetY,
+        };
+      });
+      return;
+    }
 
-      // Handle regular scrolling (two-finger pan on trackpad)
-      const deltaX = e.deltaX;
-      const deltaY = e.deltaY;
+    // Handle regular scrolling (two-finger pan on trackpad)
+    const deltaX = e.deltaX;
+    const deltaY = e.deltaY;
 
-      setViewport((prev) => ({
-        ...prev,
-        panOffsetX: prev.panOffsetX - deltaX,
-        panOffsetY: prev.panOffsetY - deltaY,
-      }));
-    },
-    [viewport, setViewport]
-  );
+    setViewport((prev) => ({
+      ...prev,
+      panOffsetX: prev.panOffsetX - deltaX,
+      panOffsetY: prev.panOffsetY - deltaY,
+    }));
+  };
 
   // Handle panning
-  const togglePanMode = useCallback(() => {
+  const togglePanMode = () => {
     const canvas = canvasRef.current;
     console.log(canvas);
     setViewport((prev) => ({
@@ -171,35 +165,29 @@ export function useCanvas() {
       panMode: !prev.panMode,
       expandedNodeId: "",
     }));
-  }, [setViewport]);
+  };
 
-  const handleMouseDown = useCallback(
-    (e: MouseEvent) => {
-      if (e.button !== 0 || !viewport.panMode) return; // Only handle left click and when pan mode is active
+  const handleMouseDown = (e: MouseEvent) => {
+    if (e.button !== 0 || !viewport.panMode) return; // Only handle left click and when pan mode is active
 
-      setViewport((prev) => ({
-        ...prev,
-        isPanning: true,
-        panStartX: e.clientX - prev.panOffsetX,
-        panStartY: e.clientY - prev.panOffsetY,
-      }));
-    },
-    [viewport.panMode, setViewport]
-  );
+    setViewport((prev) => ({
+      ...prev,
+      isPanning: true,
+      panStartX: e.clientX - prev.panOffsetX,
+      panStartY: e.clientY - prev.panOffsetY,
+    }));
+  };
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (!viewport.isPanning) return;
-      setViewport((prev) => ({
-        ...prev,
-        panOffsetX: e.clientX - prev.panStartX,
-        panOffsetY: e.clientY - prev.panStartY,
-      }));
-    },
-    [viewport.isPanning, setViewport]
-  );
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!viewport.isPanning) return;
+    setViewport((prev) => ({
+      ...prev,
+      panOffsetX: e.clientX - prev.panStartX,
+      panOffsetY: e.clientY - prev.panStartY,
+    }));
+  };
 
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = () => {
     setViewport((prev) => ({
       ...prev,
       isPanning: false,
@@ -212,104 +200,86 @@ export function useCanvas() {
         initialNodeY: 0,
       },
     }));
-  }, [setViewport]);
+  };
 
   // Add touch event handlers for mobile support
-  const handleTouchStart = useCallback(
-    (e: TouchEvent) => {
-      if (e.touches.length !== 1) return; // Only handle single touch
+  const handleTouchStart = (e: TouchEvent) => {
+    if (e.touches.length !== 1) return; // Only handle single touch
 
-      const touch = e.touches[0];
-      setViewport((prev) => ({
-        ...prev,
-        isPanning: true,
-        panStartX: touch.clientX - prev.panOffsetX,
-        panStartY: touch.clientY - prev.panOffsetY,
-      }));
-    },
-    [setViewport]
-  );
+    const touch = e.touches[0];
+    setViewport((prev) => ({
+      ...prev,
+      isPanning: true,
+      panStartX: touch.clientX - prev.panOffsetX,
+      panStartY: touch.clientY - prev.panOffsetY,
+    }));
+  };
 
-  const handleTouchMove = useCallback(
-    (e: TouchEvent) => {
-      e.preventDefault();
-      if (!viewport.isPanning || e.touches.length !== 1) return;
+  const handleTouchMove = (e: TouchEvent) => {
+    e.preventDefault();
+    if (!viewport.isPanning || e.touches.length !== 1) return;
 
-      const touch = e.touches[0];
-      setViewport((prev) => ({
-        ...prev,
-        panOffsetX: touch.clientX - prev.panStartX,
-        panOffsetY: touch.clientY - prev.panStartY,
-      }));
-    },
-    [viewport.isPanning, setViewport]
-  );
+    const touch = e.touches[0];
+    setViewport((prev) => ({
+      ...prev,
+      panOffsetX: touch.clientX - prev.panStartX,
+      panOffsetY: touch.clientY - prev.panStartY,
+    }));
+  };
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = () => {
     setViewport((prev) => ({
       ...prev,
       isPanning: false,
     }));
-  }, [setViewport]);
+  };
 
   // Handle node drag
-  const startNodeDrag = useCallback(
-    (event: React.MouseEvent, nodeId: string) => {
-      event.preventDefault();
-      event.stopPropagation();
+  const startNodeDrag = (event: React.MouseEvent, nodeId: string) => {
+    event.preventDefault();
+    event.stopPropagation();
 
-      if (viewport.isPanning) return;
+    if (viewport.isPanning) return;
 
-      const node = nodes.find((n) => n.id === nodeId);
-      if (!node) return;
+    const node = nodes.find((n) => n.id === nodeId);
+    if (!node) return;
 
-      setViewport((prev) => ({
-        ...prev,
-        isDragging: true,
-        selectedNodeId: nodeId,
-        lastSelectedNodeId: nodeId,
-        dragState: {
-          startX: event.clientX,
-          startY: event.clientY,
-          initialNodeX: node.x,
-          initialNodeY: node.y,
-        },
-      }));
-    },
-    [viewport.isPanning, nodes, setViewport]
-  );
+    setViewport((prev) => ({
+      ...prev,
+      isDragging: true,
+      selectedNodeId: nodeId,
+      lastSelectedNodeId: nodeId,
+      dragState: {
+        startX: event.clientX,
+        startY: event.clientY,
+        initialNodeX: node.x,
+        initialNodeY: node.y,
+      },
+    }));
+  };
 
-  const handleNodeDrag = useCallback(
-    (event: MouseEvent) => {
-      if (
-        !viewport.isDragging ||
-        !viewport.dragState ||
-        !viewport.selectedNodeId
-      )
-        return;
+  const handleNodeDrag = (event: MouseEvent) => {
+    if (!viewport.isDragging || !viewport.dragState || !viewport.selectedNodeId)
+      return;
 
-      const deltaX =
-        (event.clientX - viewport.dragState.startX) / viewport.scale;
-      const deltaY =
-        (event.clientY - viewport.dragState.startY) / viewport.scale;
+    const deltaX = (event.clientX - viewport.dragState.startX) / viewport.scale;
+    const deltaY = (event.clientY - viewport.dragState.startY) / viewport.scale;
 
-      setNodes((prevNodes) =>
-        prevNodes.map((node) => {
-          if (node.id !== viewport.selectedNodeId) return node;
+    setNodes((prevNodes) =>
+      prevNodes.map((node) => {
+        if (node.id !== viewport.selectedNodeId) return node;
 
-          return {
-            ...node,
-            x: viewport.dragState.initialNodeX + deltaX,
-            y: viewport.dragState.initialNodeY + deltaY,
-          };
-        })
-      );
-    },
-    [viewport, setNodes]
-  );
+        return {
+          ...node,
+          x: viewport.dragState.initialNodeX + deltaX,
+          y: viewport.dragState.initialNodeY + deltaY,
+        };
+      })
+    );
+  };
 
   // Get random position within visible canvas
-  const getRandomPositionInViewport = useCallback(() => {
+  const getRandomPositionInViewport = () => {
     // Calculate visible canvas area
     const visibleWidth = window.innerWidth / viewport.scale;
     const visibleHeight = window.innerHeight / viewport.scale;
@@ -327,22 +297,22 @@ export function useCanvas() {
       x: visibleLeft + paddingX + Math.random() * (visibleWidth - paddingX * 2),
       y: visibleTop + paddingY + Math.random() * (visibleHeight - paddingY * 2),
     };
-  }, [viewport]);
+  };
 
-  const updateNode = useCallback((nodeId: string, update: Partial<Node>) => {
+  const updateNode = (nodeId: string, update: Partial<Node>) => {
     setNodes((prev) =>
       prev.map((node) =>
         node.id === nodeId ? ({ ...node, ...update } as Node) : node
       )
     );
-  }, []);
+  };
 
-  const updateViewport = useCallback((update: Partial<Viewport>) => {
+  const updateViewport = (update: Partial<Viewport>) => {
     setViewport((prev) => ({ ...prev, ...update }));
-  }, []);
+  };
 
   // Node creation
-  const addTextNode = useCallback(() => {
+  const addTextNode = () => {
     const position = getRandomPositionInViewport();
 
     const newNode: Node = {
@@ -358,54 +328,51 @@ export function useCanvas() {
 
     setNodes((prev) => [...prev, newNode]);
     return newNode;
-  }, [getRandomPositionInViewport, setNodes]);
+  };
 
-  const addFileNode = useCallback(
-    async (file: File, fileType: FileType) => {
-      const position = getRandomPositionInViewport();
-      const nodeId = nanoid();
-      const fileName = file.name || "Untitled file-" + nanoid(6);
+  const addFileNode = async (file: File, fileType: FileType) => {
+    const position = getRandomPositionInViewport();
+    const nodeId = nanoid();
+    const fileName = file.name || "Untitled file-" + nanoid(6);
 
-      // Create the base node
-      const newNode: FileNode = {
+    // Create the base node
+    const newNode: FileNode = {
+      id: nodeId,
+      type: "file",
+      file: fileName,
+      label: fileName,
+      x: position.x,
+      y: position.y,
+      width: NODE_CONSTANTS.FILE_NODE_WIDTH,
+      height: NODE_CONSTANTS.NODE_HEIGHT,
+      fileType: fileType,
+    };
+
+    try {
+      // Read the file content
+      const content = await readFileContent(file);
+
+      // Store in IndexedDB
+      const fileContent: FileContent = {
         id: nodeId,
-        type: "file",
-        file: fileName,
-        label: fileName,
-        x: position.x,
-        y: position.y,
-        width: NODE_CONSTANTS.FILE_NODE_WIDTH,
-        height: NODE_CONSTANTS.NODE_HEIGHT,
-        fileType: fileType,
+        name: fileName,
+        type: fileType,
+        content,
+        size: file.size,
+        lastModified: file.lastModified,
       };
 
-      try {
-        // Read the file content
-        const content = await readFileContent(file);
+      await storeFileContent(fileContent);
+    } catch (error) {
+      console.error("Error processing file:", error);
+      // Continue with node creation even if file processing fails
+    }
 
-        // Store in IndexedDB
-        const fileContent: FileContent = {
-          id: nodeId,
-          name: fileName,
-          type: fileType,
-          content,
-          size: file.size,
-          lastModified: file.lastModified,
-        };
+    setNodes((prev) => [...prev, newNode]);
+    return newNode;
+  };
 
-        await storeFileContent(fileContent);
-      } catch (error) {
-        console.error("Error processing file:", error);
-        // Continue with node creation even if file processing fails
-      }
-
-      setNodes((prev) => [...prev, newNode]);
-      return newNode;
-    },
-    [getRandomPositionInViewport, setNodes]
-  );
-
-  const addStickyNode = useCallback(() => {
+  const addStickyNode = () => {
     const position = getRandomPositionInViewport();
 
     const newNode: Node = {
@@ -421,44 +388,41 @@ export function useCanvas() {
 
     setNodes((prev) => [...prev, newNode]);
     return newNode;
-  }, [getRandomPositionInViewport, setNodes]);
+  };
 
-  const deleteNode = useCallback(
-    (nodeId: string) => {
-      // Get the node before deleting it
-      const nodeToDelete = nodes.find((node) => node.id === nodeId);
+  const deleteNode = (nodeId: string) => {
+    // Get the node before deleting it
+    const nodeToDelete = nodes.find((node) => node.id === nodeId);
 
-      // Delete the node from the nodes array
-      setNodes((prevNodes) => prevNodes.filter((node) => node.id !== nodeId));
+    // Delete the node from the nodes array
+    setNodes((prevNodes) => prevNodes.filter((node) => node.id !== nodeId));
 
-      // If it's a file node, also delete the file content from IndexedDB
-      if (nodeToDelete?.type === "file") {
-        deleteFileContent(nodeId).catch((err) =>
-          console.error("Failed to delete file content:", err)
-        );
-      }
+    // If it's a file node, also delete the file content from IndexedDB
+    if (nodeToDelete?.type === "file") {
+      deleteFileContent(nodeId).catch((err) =>
+        console.error("Failed to delete file content:", err)
+      );
+    }
 
-      // Clear selection if the deleted node was selected
-      if (
-        viewport.selectedNodeId === nodeId ||
-        viewport.lastSelectedNodeId === nodeId
-      ) {
-        setViewport((prev) => ({
-          ...prev,
-          selectedNodeId:
-            prev.selectedNodeId === nodeId ? "" : prev.selectedNodeId,
-          lastSelectedNodeId:
-            prev.lastSelectedNodeId === nodeId ? "" : prev.lastSelectedNodeId,
-        }));
-      }
-    },
-    [nodes, setNodes, viewport, setViewport]
-  );
+    // Clear selection if the deleted node was selected
+    if (
+      viewport.selectedNodeId === nodeId ||
+      viewport.lastSelectedNodeId === nodeId
+    ) {
+      setViewport((prev) => ({
+        ...prev,
+        selectedNodeId:
+          prev.selectedNodeId === nodeId ? "" : prev.selectedNodeId,
+        lastSelectedNodeId:
+          prev.lastSelectedNodeId === nodeId ? "" : prev.lastSelectedNodeId,
+      }));
+    }
+  };
+
   // Initialize the canvas
   useEffect(() => {
     if (initialData) {
       setNodes(initialData.nodes);
-      setEdges(initialData.edges);
       resetView();
     }
     setLoading(false);
@@ -476,7 +440,7 @@ export function useCanvas() {
     }
   }, [viewport.panMode]);
 
-  // Update the event listeners
+  // Event listeners
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -529,7 +493,7 @@ export function useCanvas() {
   }, [viewport.isDragging, viewport.selectedNodeId, handleNodeDrag]);
 
   return {
-    canvas: { nodes, edges, viewport },
+    canvas: { nodes, viewport },
     loading,
     canvasRef,
     controls: {

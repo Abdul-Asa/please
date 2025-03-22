@@ -1,12 +1,27 @@
 "use client";
-import { CanvasControls } from "./Controls";
-import { CanvasEdges } from "./Edges";
-import { CanvasNodes } from "./Nodes";
+import { CanvasControls } from "./tools/Controls";
+import { CanvasNodes } from "./node/Nodes";
 import { useCanvas } from "./useCanvas";
-import { CanvasData } from "./types";
-import { CanvasProvider } from "./Context";
 import { Loader2 } from "lucide-react";
-import { CanvasToolbar } from "./Toolbar";
+import { CanvasToolbar } from "./tools/Toolbar";
+import { CanvasContextType, CanvasData } from "./types";
+import { createContext, ReactNode } from "react";
+
+// Context for the canvas
+export const CanvasContext = createContext<CanvasContextType | null>(null);
+function CanvasProvider({
+  children,
+  initialData,
+}: {
+  children: ReactNode;
+  initialData: CanvasData | null;
+}) {
+  return (
+    <CanvasContext.Provider value={{ initialData }}>
+      {children}
+    </CanvasContext.Provider>
+  );
+}
 
 export function Canvas() {
   return (

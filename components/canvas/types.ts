@@ -1,11 +1,5 @@
 export type NodeType = "text" | "file" | "sticky";
-export type Direction = "top" | "right" | "bottom" | "left";
-export type MarkerType = "none" | "arrow";
 export type FileType = "image" | "pdf" | "text";
-export interface Point {
-  x: number;
-  y: number;
-}
 
 interface BaseNode {
   id: string;
@@ -35,16 +29,6 @@ export interface StickyNode extends BaseNode {
 }
 
 export type Node = TextNode | FileNode | StickyNode;
-
-export interface Edge {
-  id: string;
-  fromNode: string;
-  toNode: string;
-  fromSide: Direction;
-  toSide: Direction;
-  fromEnd?: MarkerType;
-  toEnd?: MarkerType;
-}
 
 export interface CanvasColor {
   "1": string;
@@ -86,6 +70,18 @@ export interface Viewport {
 
 export interface CanvasData {
   nodes: Node[];
-  edges: Edge[];
   viewport?: Viewport;
+}
+
+export interface FileContent {
+  id: string;
+  name: string;
+  type: string;
+  content: string | ArrayBuffer;
+  size: number;
+  lastModified: number;
+}
+
+export interface CanvasContextType {
+  initialData: CanvasData | null;
 }
