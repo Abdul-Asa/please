@@ -1,6 +1,6 @@
 "use client";
 
-import { ItalicIcon } from "lucide-react";
+import { Code, Code2 } from "lucide-react";
 import React from "react";
 
 import { Button, type ButtonProps } from "@/components/ui/button";
@@ -10,9 +10,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useToolbar } from "@/components/text-editor/toolbar/toolbar-provider";
+import { useToolbar } from "./toolbar-provider";
 
-const ItalicToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const CodeBlockToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, onClick, children, ...props }, ref) => {
     const { editor } = useToolbar();
     return (
@@ -23,29 +23,28 @@ const ItalicToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
             size="icon"
             className={cn(
               "h-8 w-8",
-              editor?.isActive("italic") && "bg-accent",
+              editor?.isActive("codeBlock") && "bg-accent",
               className
             )}
             onClick={(e) => {
-              editor?.chain().focus().toggleItalic().run();
+              editor?.chain().focus().toggleCodeBlock().run();
               onClick?.(e);
             }}
-            disabled={!editor?.can().chain().focus().toggleItalic().run()}
+            disabled={!editor?.can().chain().focus().toggleCodeBlock().run()}
             ref={ref}
             {...props}
           >
-            {children || <ItalicIcon className="h-4 w-4" />}
+            {children || <Code className="h-4 w-4" />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <span>Italic</span>
-          <span className="ml-1 text-xs text-gray-11">(cmd + i)</span>
+          <span>Code Block</span>
         </TooltipContent>
       </Tooltip>
     );
   }
 );
 
-ItalicToolbar.displayName = "ItalicToolbar";
+CodeBlockToolbar.displayName = "CodeBlockToolbar";
 
-export { ItalicToolbar };
+export { CodeBlockToolbar };

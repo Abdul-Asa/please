@@ -1,6 +1,6 @@
 "use client";
 
-import { Strikethrough } from "lucide-react";
+import { TextQuote } from "lucide-react";
 import React from "react";
 
 import { Button, type ButtonProps } from "@/components/ui/button";
@@ -9,10 +9,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useToolbar } from "./toolbar-provider";
 import { cn } from "@/lib/utils";
-import { useToolbar } from "@/components/text-editor/toolbar/toolbar-provider";
-
-const StrikeThroughToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const BlockquoteToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, onClick, children, ...props }, ref) => {
     const { editor } = useToolbar();
     return (
@@ -23,29 +22,28 @@ const StrikeThroughToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
             size="icon"
             className={cn(
               "h-8 w-8",
-              editor?.isActive("strike") && "bg-accent",
+              editor?.isActive("blockquote") && "bg-accent",
               className
             )}
             onClick={(e) => {
-              editor?.chain().focus().toggleStrike().run();
+              editor?.chain().focus().toggleBlockquote().run();
               onClick?.(e);
             }}
-            disabled={!editor?.can().chain().focus().toggleStrike().run()}
+            disabled={!editor?.can().chain().focus().toggleBlockquote().run()}
             ref={ref}
             {...props}
           >
-            {children || <Strikethrough className="h-4 w-4" />}
+            {children || <TextQuote className="h-4 w-4" />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <span>Strikethrough</span>
-          <span className="ml-1 text-xs text-gray-11">(cmd + shift + x)</span>
+          <span>Blockquote</span>
         </TooltipContent>
       </Tooltip>
     );
   }
 );
 
-StrikeThroughToolbar.displayName = "StrikeThroughToolbar";
+BlockquoteToolbar.displayName = "BlockquoteToolbar";
 
-export { StrikeThroughToolbar };
+export { BlockquoteToolbar };

@@ -1,9 +1,7 @@
 "use client";
-import { CanvasControls } from "./tools/Controls";
-import { CanvasNodes } from "./node/Nodes";
+import { CanvasNodes } from "./node";
 import { useCanvas } from "./useCanvas";
 import { Loader2 } from "lucide-react";
-import { CanvasToolbar } from "./tools/Toolbar";
 import { CanvasContextType, CanvasData } from "./types";
 import { createContext, ReactNode } from "react";
 import { CanvasSidebar } from "./tools/Sidebar";

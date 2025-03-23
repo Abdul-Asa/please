@@ -1,5 +1,8 @@
 "use client";
 
+import { List } from "lucide-react";
+import React from "react";
+
 import { Button, type ButtonProps } from "@/components/ui/button";
 import {
   Tooltip,
@@ -7,11 +10,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useToolbar } from "@/components/text-editor/toolbar/toolbar-provider";
-import { CornerUpLeft } from "lucide-react";
-import React from "react";
+import { useToolbar } from "./toolbar-provider";
 
-const UndoToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const BulletListToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, onClick, children, ...props }, ref) => {
     const { editor } = useToolbar();
 
@@ -21,26 +22,30 @@ const UndoToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <Button
             variant="ghost"
             size="icon"
-            className={cn("h-8 w-8", className)}
+            className={cn(
+              "h-8 w-8",
+              editor?.isActive("bulletList") && "bg-accent",
+              className
+            )}
             onClick={(e) => {
-              editor?.chain().focus().undo().run();
+              editor?.chain().focus().toggleBulletList().run();
               onClick?.(e);
             }}
-            disabled={!editor?.can().chain().focus().undo().run()}
+            disabled={!editor?.can().chain().focus().toggleBulletList().run()}
             ref={ref}
             {...props}
           >
-            {children || <CornerUpLeft className="h-4 w-4" />}
+            {children || <List className="h-4 w-4" />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <span>Undo</span>
+          <span>Bullet list</span>
         </TooltipContent>
       </Tooltip>
     );
   }
 );
 
-UndoToolbar.displayName = "UndoToolbar";
+BulletListToolbar.displayName = "BulletListToolbar";
 
-export { UndoToolbar };
+export { BulletListToolbar };

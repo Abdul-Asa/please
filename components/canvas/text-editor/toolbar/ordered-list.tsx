@@ -1,6 +1,6 @@
 "use client";
 
-import { Code2 } from "lucide-react";
+import { ListOrdered } from "lucide-react";
 import React from "react";
 
 import { Button, type ButtonProps } from "@/components/ui/button";
@@ -10,9 +10,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useToolbar } from "@/components/text-editor/toolbar/toolbar-provider";
+import { useToolbar } from "./toolbar-provider";
 
-const CodeToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const OrderedListToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, onClick, children, ...props }, ref) => {
     const { editor } = useToolbar();
     return (
@@ -23,28 +23,28 @@ const CodeToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
             size="icon"
             className={cn(
               "h-8 w-8",
-              editor?.isActive("code") && "bg-accent",
+              editor?.isActive("orderedList") && "bg-accent",
               className
             )}
             onClick={(e) => {
-              editor?.chain().focus().toggleCode().run();
+              editor?.chain().focus().toggleOrderedList().run();
               onClick?.(e);
             }}
-            disabled={!editor?.can().chain().focus().toggleCode().run()}
+            disabled={!editor?.can().chain().focus().toggleOrderedList().run()}
             ref={ref}
             {...props}
           >
-            {children || <Code2 className="h-4 w-4" />}
+            {children || <ListOrdered className="h-4 w-4" />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <span>Code</span>
+          <span>Ordered list</span>
         </TooltipContent>
       </Tooltip>
     );
   }
 );
 
-CodeToolbar.displayName = "CodeToolbar";
+OrderedListToolbar.displayName = "OrderedListToolbar";
 
-export { CodeToolbar };
+export { OrderedListToolbar };

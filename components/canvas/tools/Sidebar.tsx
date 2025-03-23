@@ -11,9 +11,12 @@ import {
 import { useCanvas } from "../useCanvas";
 import { useRef } from "react";
 import { FileType } from "../types";
+import { motion, AnimatePresence } from "motion/react";
+
 export function CanvasSidebar() {
-  const canvas = useCanvas();
-  const { addTextNode, addFileNode, addStickyNode } = canvas.controls;
+  const { canvas, controls } = useCanvas();
+  const { addTextNode, addFileNode, addStickyNode } = controls;
+  const isExpanded = canvas.viewport.expandedNodeId !== "";
   const imageInputRef = useRef<HTMLInputElement>(null);
   const textInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +40,17 @@ export function CanvasSidebar() {
   };
 
   return (
-    <div className="fixed left-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 p-2 backdrop-blur-sm rounded-sm border border-border shadow-sm">
+    <motion.div
+      className="absolute left-4 top-1/2 flex flex-col items-center gap-4 p-2 backdrop-blur-sm rounded-sm border border-border shadow-sm z-[40]"
+      initial={{ x: isExpanded ? -100 : 0, y: "-50%" }}
+      animate={{ x: isExpanded ? -100 : 0, y: "-50%" }}
+      exit={{ x: -100, y: "-50%" }}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      }}
+    >
       {/* Text note */}
       <Button
         variant="outline"
@@ -104,6 +117,6 @@ export function CanvasSidebar() {
         accept=".pdf"
         multiple
       />
-    </div>
+    </motion.div>
   );
 }

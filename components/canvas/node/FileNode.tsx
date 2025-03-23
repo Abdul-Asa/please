@@ -1,9 +1,9 @@
 import { FileTextIcon, Loader2, XIcon, FileIcon } from "lucide-react";
-import { FileContent } from "../store";
+import { FileContent } from "../types";
 import { getFileContent } from "../store";
 import { FileNode } from "../types";
 import { useEffect, useState } from "react";
-import { Editor } from "../../text-editor";
+import { Editor } from "../text-editor";
 import { useCanvas } from "../useCanvas";
 
 export function FileNodeContent({

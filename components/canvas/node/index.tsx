@@ -12,15 +12,11 @@ import {
   MaximizeIcon,
 } from "lucide-react";
 import { Button } from "../../ui/button";
-import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
-import { Editor } from "../../text-editor";
-const FileNodeContent = dynamic(
-  () => import("./FileNode").then((mod) => mod.FileNodeContent),
-  {
-    ssr: false,
-  }
-);
+import { motion } from "motion/react";
+import { Editor } from "../text-editor";
+import { TextNodeContent } from "./TextNode";
+import { FileNodeContent } from "./FileNode";
+
 export function CanvasNodes() {
   const { canvas } = useCanvas();
   const { nodes, viewport } = canvas;
@@ -103,9 +99,11 @@ function CanvasNode({ node }: { node: Node }) {
       style={{
         minWidth: node.width,
         minHeight: node.height,
-        zIndex: isExpanded ? 50 : isLastSelected ? 10 : "auto",
+        zIndex: isExpanded ? 100 : isLastSelected ? 10 : "auto",
         maxWidth: isExpanded ? "none" : NODE_CONSTANTS.MAX_NODE_WIDTH,
         maxHeight: isExpanded ? "none" : NODE_CONSTANTS.MAX_NODE_HEIGHT,
+        height: isExpanded ? "calc(100vh - 2rem)" : "max-content",
+        width: isExpanded ? "calc(100vw - 2rem)" : "max-content",
       }}
       initial={false}
       animate={
@@ -113,14 +111,10 @@ function CanvasNode({ node }: { node: Node }) {
           ? {
               left: -viewport.panOffsetX / viewport.scale + 16,
               top: -viewport.panOffsetY / viewport.scale + 16,
-              height: "calc(100vh - 2rem)",
-              width: "calc(100vw - 2rem)",
             }
           : {
               left: node.x,
               top: node.y,
-              height: "fit-content",
-              width: "fit-content",
             }
       }
       transition={{
@@ -196,52 +190,16 @@ function CanvasNode({ node }: { node: Node }) {
           </Button>
         </div>
       </div>
-      <div className=" overflow-auto flex-1 max-h-[calc(400px-2.5rem)]">
-        {node.type === "text" && (
-          <TextNodeContent node={node as TextNode} isExpanded={isExpanded} />
-        )}
-        {node.type === "file" && (
-          <FileNodeContent node={node as FileNode} isExpanded={isExpanded} />
-        )}
-        {node.type === "sticky" && (
-          <StickyNodeContent
-            node={node as StickyNode}
-            isExpanded={isExpanded}
-          />
-        )}
-      </div>
-    </motion.div>
-  );
-}
-
-function TextNodeContent({
-  node,
-  isExpanded,
-}: {
-  node: TextNode;
-  isExpanded: boolean;
-}) {
-  const { controls } = useCanvas();
-
-  const handleContentChange = (newContent: string) => {
-    controls.updateNode(node.id, { text: newContent });
-  };
-
-  return (
-    <div className={cn("h-full w-full", isExpanded && "flex-1 flex flex-col")}>
-      {isExpanded ? (
-        <Editor
-          content={node.text}
-          onChange={handleContentChange}
-          className="flex-1 h-full"
-        />
-      ) : (
-        <div
-          className="p-2 prose prose-sm max-w-none overflow-auto max-h-[300px]"
-          dangerouslySetInnerHTML={{ __html: node.text }}
-        />
+      {node.type === "text" && (
+        <TextNodeContent node={node as TextNode} isExpanded={isExpanded} />
       )}
-    </div>
+      {node.type === "file" && (
+        <FileNodeContent node={node as FileNode} isExpanded={isExpanded} />
+      )}
+      {node.type === "sticky" && (
+        <StickyNodeContent node={node as StickyNode} isExpanded={isExpanded} />
+      )}
+    </motion.div>
   );
 }
 

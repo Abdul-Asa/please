@@ -8,7 +8,6 @@ interface BaseNode {
   y: number;
   width: number;
   height: number;
-  color?: string;
   label?: string;
 }
 
@@ -29,24 +28,6 @@ export interface StickyNode extends BaseNode {
 }
 
 export type Node = TextNode | FileNode | StickyNode;
-
-export interface CanvasColor {
-  "1": string;
-  "2": string;
-  "3": string;
-  "4": string;
-  "5": string;
-  "6": string;
-}
-
-export const colors: CanvasColor = {
-  "1": "#ef4444", // red
-  "2": "#f97316", // orange
-  "3": "#eab308", // yellow
-  "4": "#22c55e", // green
-  "5": "#06b6d4", // cyan
-  "6": "#a855f7", // purple
-};
 
 export interface Viewport {
   scale: number;
@@ -84,4 +65,23 @@ export interface FileContent {
 
 export interface CanvasContextType {
   initialData: CanvasData | null;
+}
+
+export interface Code {
+  id: string;
+  name: string;
+  comment: string;
+  color: string;
+  selection: {
+    start: number;
+    end: number;
+    text: string;
+  };
+  nodeId: string;
+}
+
+export interface CodeGroup {
+  id: string;
+  name: string;
+  codes: Code[];
 }

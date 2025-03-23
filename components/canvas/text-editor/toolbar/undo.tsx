@@ -1,8 +1,5 @@
 "use client";
 
-import { WrapText } from "lucide-react";
-import React from "react";
-
 import { Button, type ButtonProps } from "@/components/ui/button";
 import {
   Tooltip,
@@ -10,11 +7,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useToolbar } from "@/components/text-editor/toolbar/toolbar-provider";
+import { useToolbar } from "./toolbar-provider";
+import { CornerUpLeft } from "lucide-react";
+import React from "react";
 
-const HardBreakToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const UndoToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, onClick, children, ...props }, ref) => {
     const { editor } = useToolbar();
+
     return (
       <Tooltip>
         <TooltipTrigger asChild>
@@ -23,23 +23,24 @@ const HardBreakToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
             size="icon"
             className={cn("h-8 w-8", className)}
             onClick={(e) => {
-              editor?.chain().focus().setHardBreak().run();
+              editor?.chain().focus().undo().run();
               onClick?.(e);
             }}
+            disabled={!editor?.can().chain().focus().undo().run()}
             ref={ref}
             {...props}
           >
-            {children || <WrapText className="h-4 w-4" />}
+            {children || <CornerUpLeft className="h-4 w-4" />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <span>Hard break</span>
+          <span>Undo</span>
         </TooltipContent>
       </Tooltip>
     );
   }
 );
 
-HardBreakToolbar.displayName = "HardBreakToolbar";
+UndoToolbar.displayName = "UndoToolbar";
 
-export { HardBreakToolbar };
+export { UndoToolbar };

@@ -1,6 +1,6 @@
 "use client";
 
-import { CornerUpRight } from "lucide-react";
+import { WrapText } from "lucide-react";
 import React from "react";
 
 import { Button, type ButtonProps } from "@/components/ui/button";
@@ -10,12 +10,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useToolbar } from "@/components/text-editor/toolbar/toolbar-provider";
+import { useToolbar } from "./toolbar-provider";
 
-const RedoToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const HardBreakToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, onClick, children, ...props }, ref) => {
     const { editor } = useToolbar();
-
     return (
       <Tooltip>
         <TooltipTrigger asChild>
@@ -24,24 +23,23 @@ const RedoToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
             size="icon"
             className={cn("h-8 w-8", className)}
             onClick={(e) => {
-              editor?.chain().focus().redo().run();
+              editor?.chain().focus().setHardBreak().run();
               onClick?.(e);
             }}
-            disabled={!editor?.can().chain().focus().redo().run()}
             ref={ref}
             {...props}
           >
-            {children || <CornerUpRight className="h-4 w-4" />}
+            {children || <WrapText className="h-4 w-4" />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <span>Redo</span>
+          <span>Hard break</span>
         </TooltipContent>
       </Tooltip>
     );
   }
 );
 
-RedoToolbar.displayName = "RedoToolbar";
+HardBreakToolbar.displayName = "HardBreakToolbar";
 
-export { RedoToolbar };
+export { HardBreakToolbar };
