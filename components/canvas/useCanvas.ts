@@ -5,13 +5,23 @@ import {
   viewportAtom,
   storeFileContent,
   deleteFileContent,
+  codesAtom,
+  codeGroupsAtom,
 } from "./store";
 import {
   VIEWPORT_CONSTANTS,
   NODE_CONSTANTS,
   defaultViewport,
 } from "./constants";
-import type { Node, FileNode, FileType, Viewport, FileContent } from "./types";
+import type {
+  Node,
+  FileNode,
+  FileType,
+  Viewport,
+  FileContent,
+  Code,
+  CodeSelection,
+} from "./types";
 import { nanoid } from "nanoid";
 import { readFileContent } from "./utils";
 import { CanvasContext } from ".";
@@ -28,6 +38,8 @@ export function useCanvas() {
   const [loading, setLoading] = useState(true);
   const [nodes, setNodes] = useAtom(nodesAtom);
   const [viewport, setViewport] = useAtom(viewportAtom);
+  const [codes, setCodes] = useAtom(codesAtom);
+  const [codeGroups, setCodeGroups] = useAtom(codeGroupsAtom);
 
   // Zoom functions
   const zoomIn = () => {
@@ -431,6 +443,52 @@ export function useCanvas() {
     }
   };
 
+  // Code management functions
+  const addCode = (code: Omit<Code, "id">) => {
+    const newCode: Code = {
+      ...code,
+      id: nanoid(),
+      selections: [],
+    };
+    setCodes((prev) => [...prev, newCode]);
+    return newCode;
+  };
+
+  const updateCode = (codeId: string, update: Partial<Code>) => {
+    setCodes((prev) =>
+      prev.map((code) => (code.id === codeId ? { ...code, ...update } : code))
+    );
+  };
+
+  const deleteCode = (codeId: string) => {
+    setCodes((prev) => prev.filter((code) => code.id !== codeId));
+  };
+
+  const addCodeSelection = (codeId: string, selection: CodeSelection) => {
+    setCodes((prev) =>
+      prev.map((code) =>
+        code.id === codeId
+          ? { ...code, selections: [...code.selections, selection] }
+          : code
+      )
+    );
+  };
+
+  const removeCodeSelection = (codeId: string, selectionIndex: number) => {
+    setCodes((prev) =>
+      prev.map((code) =>
+        code.id === codeId
+          ? {
+              ...code,
+              selections: code.selections.filter(
+                (_, i) => i !== selectionIndex
+              ),
+            }
+          : code
+      )
+    );
+  };
+
   // Initialize the canvas
   useEffect(() => {
     if (initialData) {
@@ -505,7 +563,7 @@ export function useCanvas() {
   }, [viewport.isDragging, viewport.selectedNodeId, handleNodeDrag]);
 
   return {
-    canvas: { nodes, viewport },
+    canvas: { nodes, viewport, codes, codeGroups },
     loading,
     canvasRef,
     controls: {
@@ -520,6 +578,11 @@ export function useCanvas() {
       deleteNode,
       updateNode,
       updateViewport,
+      addCode,
+      updateCode,
+      deleteCode,
+      addCodeSelection,
+      removeCodeSelection,
     },
     dragHandlers: {
       startNodeDrag,

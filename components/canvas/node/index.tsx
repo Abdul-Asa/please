@@ -223,6 +223,7 @@ function StickyNodeContent({
           content={node.text}
           onChange={handleContentChange}
           className="flex-1 h-full"
+          nodeId={node.id}
         />
       ) : (
         <div

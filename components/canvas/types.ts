@@ -67,17 +67,19 @@ export interface CanvasContextType {
   initialData: CanvasData | null;
 }
 
+export interface CodeSelection {
+  start: number;
+  end: number;
+  text: string;
+  nodeId: string;
+}
+
 export interface Code {
   id: string;
   name: string;
   comment: string;
   color: string;
-  selection: {
-    start: number;
-    end: number;
-    text: string;
-  };
-  nodeId: string;
+  selections: CodeSelection[];
 }
 
 export interface CodeGroup {

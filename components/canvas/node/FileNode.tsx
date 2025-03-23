@@ -95,6 +95,7 @@ export function FileNodeContent({
           <Editor
             content={fileContent.content as string}
             onChange={handleTextContentChange}
+            nodeId={node.id}
           />
         ) : (
           <div

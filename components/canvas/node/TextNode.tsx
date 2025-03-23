@@ -21,6 +21,7 @@ export function TextNodeContent({
       content={node.text}
       onChange={handleContentChange}
       isExpanded={isExpanded}
+      nodeId={node.id}
     />
   );
 }

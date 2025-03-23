@@ -1,5 +1,5 @@
 import { atomWithStorage } from "jotai/utils";
-import type { FileContent, Node, Viewport } from "./types";
+import type { FileContent, Node, Viewport, Code, CodeGroup } from "./types";
 import { defaultViewport } from "./constants";
 import Dexie from "dexie";
 // Persistent atoms
@@ -8,6 +8,8 @@ export const viewportAtom = atomWithStorage<Viewport>(
   "viewport",
   defaultViewport
 );
+export const codesAtom = atomWithStorage<Code[]>("codes", []);
+export const codeGroupsAtom = atomWithStorage<CodeGroup[]>("codeGroups", []);
 
 // IndexedDB store
 export class CanvasDatabase extends Dexie {

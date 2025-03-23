@@ -71,9 +71,16 @@ interface EditorProps {
   onChange?: (content: string) => void;
   className?: string;
   isExpanded?: boolean;
+  nodeId: string;
 }
 
-const Editor = ({ content, onChange, className, isExpanded }: EditorProps) => {
+const Editor = ({
+  content,
+  onChange,
+  className,
+  isExpanded,
+  nodeId,
+}: EditorProps) => {
   const [isEditable, setIsEditable] = useState(isExpanded || false);
 
   const editor = useEditor({
@@ -106,7 +113,7 @@ const Editor = ({ content, onChange, className, isExpanded }: EditorProps) => {
         className
       )}
     >
-      {editor && <CodeGroupMenu editor={editor} />}
+      {editor && <CodeGroupMenu editor={editor} nodeId={nodeId} />}
 
       {isEditable && (
         <div className="flex w-full items-center overflow-scroll py-2 px-2 justify-between border-b sticky top-0 left-0 bg-background z-20">

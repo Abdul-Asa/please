@@ -12,6 +12,7 @@ import { useCanvas } from "../useCanvas";
 import { useRef } from "react";
 import { FileType } from "../types";
 import { motion, AnimatePresence } from "motion/react";
+import { AddCodeDialog } from "../dialogs/AddCodeDialog";
 
 export function CanvasSidebar() {
   const { canvas, controls } = useCanvas();
@@ -75,8 +76,10 @@ export function CanvasSidebar() {
         <StickyNoteIcon size={20} />
       </Button>
 
-      {/* Upload Image */}
-      <Button
+      {/* Add Code */}
+      <AddCodeDialog />
+
+      {/* <Button
         variant="outline"
         size="icon"
         onClick={() => imageInputRef.current?.click()}
@@ -87,12 +90,10 @@ export function CanvasSidebar() {
         <FileImageIcon size={20} />
       </Button>
 
-      {/* More options */}
       <Button variant="outline" size="icon" aria-label="More options">
         <Hourglass size={20} />
       </Button>
 
-      {/* Hidden file inputs */}
       <input
         type="file"
         ref={imageInputRef}
@@ -116,7 +117,7 @@ export function CanvasSidebar() {
         onChange={(e) => handleFileUpload(e, "pdf")}
         accept=".pdf"
         multiple
-      />
+      /> */}
     </motion.div>
   );
 }

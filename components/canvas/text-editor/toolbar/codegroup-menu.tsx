@@ -1,38 +1,58 @@
 import { cn } from "@/lib/utils";
 import { BubbleMenu, Editor } from "@tiptap/react";
+import { useCanvas } from "../../useCanvas";
+import { Button } from "@/components/ui/button";
+import type { Code } from "../../types";
 
-const HIGHLIGHT_COLORS = [
-  { name: "green", class: "text-green-500 bg-green-50" },
-  { name: "yellow", class: "text-yellow-600 bg-yellow-50" },
-  { name: "blue", class: "text-blue-500 bg-blue-50" },
-  { name: "red", class: "text-red-500 bg-red-50" },
-];
+export const CodeGroupMenu = ({
+  editor,
+  nodeId,
+}: {
+  editor: Editor;
+  nodeId: string;
+}) => {
+  const { canvas, controls } = useCanvas();
+  const { codes } = canvas;
 
-export const CodeGroupMenu = ({ editor }: { editor: Editor }) => {
+  const handleCodeSelect = (codeId: string) => {
+    const { from, to } = editor.state.selection;
+    const text = editor.state.doc.textBetween(from, to);
+    const codeColor = codes.find((code) => code.id === codeId)?.color;
+    if (!codeColor) return;
+    controls.addCodeSelection(codeId, {
+      start: from,
+      end: to,
+      text,
+      nodeId,
+    });
+
+    editor.chain().focus().setHighlight({ color: codeColor }).run();
+  };
+
   return (
     <BubbleMenu
       editor={editor}
       tippyOptions={{ duration: 100 }}
       shouldShow={({ editor }) => {
-        return editor.isActive("highlight") || !editor.state.selection.empty;
+        const { from, to } = editor.state.selection;
+        const text = editor.state.doc.textBetween(from, to);
+        return !editor.state.selection.empty && text.trim().length > 0;
       }}
-      className="bg-white shadow-md rounded-md p-2 flex gap-2 items-center"
+      className="bg-white shadow-md rounded-md p-2 flex flex-col gap-1 items-start min-w-[200px]"
     >
-      {HIGHLIGHT_COLORS.map((color) => (
-        <button
-          key={color.name}
-          onClick={() =>
-            editor.chain().focus().toggleHighlight({ color: color.name }).run()
-          }
-          className={cn(
-            "p-1 px-2 rounded hover:bg-gray-100",
-            editor.isActive("highlight", { color: color.name })
-              ? "ring-2 ring-gray-200"
-              : ""
-          )}
+      {codes.map((code: Code) => (
+        <Button
+          key={code.id}
+          variant="ghost"
+          className={cn("w-full justify-start text-left", "hover:bg-gray-100")}
+          onClick={() => handleCodeSelect(code.id)}
         >
-          <span className={color.class}>Highlight</span>
-        </button>
+          <div
+            className="w-3 h-3 rounded-full mr-2"
+            style={{ backgroundColor: code.color }}
+          />
+          {code.name}
+        </Button>
       ))}
     </BubbleMenu>
   );
