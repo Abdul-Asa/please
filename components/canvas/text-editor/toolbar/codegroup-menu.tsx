@@ -17,8 +17,8 @@ export const CodeGroupMenu = ({
   const handleCodeSelect = (codeId: string) => {
     const { from, to } = editor.state.selection;
     const text = editor.state.doc.textBetween(from, to);
-    const codeColor = codes.find((code) => code.id === codeId)?.color;
-    if (!codeColor) return;
+    const codeTheme = codes.find((code) => code.id === codeId);
+    if (!codeTheme) return;
     controls.addCodeSelection(codeId, {
       start: from,
       end: to,
@@ -26,7 +26,11 @@ export const CodeGroupMenu = ({
       nodeId,
     });
 
-    editor.chain().focus().setHighlight({ color: codeColor }).run();
+    editor
+      .chain()
+      .focus()
+      .setThemeMark({ themeId: codeTheme.id, color: codeTheme.color })
+      .run();
   };
 
   return (
@@ -36,7 +40,11 @@ export const CodeGroupMenu = ({
       shouldShow={({ editor }) => {
         const { from, to } = editor.state.selection;
         const text = editor.state.doc.textBetween(from, to);
-        return !editor.state.selection.empty && text.trim().length > 0;
+        return (
+          !editor.state.selection.empty &&
+          text.trim().length > 0 &&
+          !editor.isFocused
+        );
       }}
       className="bg-white shadow-md rounded-md p-2 flex flex-col gap-1 items-start min-w-[200px]"
     >

@@ -5,7 +5,7 @@ import { EditorContent, type Extension, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import Highlight from "@tiptap/extension-highlight";
+import { ThemeMark } from "./extensions/theme-mark";
 import {
   BlockquoteToolbar,
   BoldToolbar,
@@ -58,10 +58,9 @@ const extensions = [
       },
     },
   }),
-  Highlight.configure({
-    multicolor: true,
+  ThemeMark.configure({
     HTMLAttributes: {
-      class: "highlight",
+      class: "theme-mark",
     },
   }),
 ];

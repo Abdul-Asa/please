@@ -139,3 +139,23 @@ h3.tiptap-heading + h2.tiptap-heading {
   margin: 1.5rem 0;
   padding-left: 1rem;
 }
+
+.theme-mark {
+  background: transparent;
+  position: relative;
+  display: inline-block;
+  border-radius: 2px;
+  padding: 0 2px;
+  margin: 0 -2px;
+}
+
+.theme-mark::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--theme-color, currentColor);
+  opacity: 0.4;
+}
