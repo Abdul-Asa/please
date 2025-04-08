@@ -9,7 +9,7 @@ declare module "@tiptap/core" {
     themeMark: {
       setThemeMark: (attributes: {
         themeId: string;
-        color: string;
+        color: string | string[];
       }) => ReturnType;
       unsetThemeMark: () => ReturnType;
     };
@@ -41,14 +41,50 @@ export const ThemeMark = Mark.create<ThemeMarkOptions>({
       },
       color: {
         default: null,
-        parseHTML: (element) => element.getAttribute("data-theme-color"),
+        parseHTML: (element) => {
+          const colorAttr = element.getAttribute("data-theme-color");
+          if (!colorAttr) return null;
+          try {
+            return JSON.parse(colorAttr);
+          } catch {
+            return colorAttr;
+          }
+        },
         renderHTML: (attributes) => {
           if (!attributes.color) {
             return {};
           }
+
+          const colors = Array.isArray(attributes.color)
+            ? attributes.color
+            : [attributes.color];
+
+          // If there's only one color, use a simple border
+          if (colors.length === 1) {
+            return {
+              "data-theme-color": JSON.stringify(colors),
+              style: `position: relative;
+              padding-bottom: 1px;
+              --theme-color: ${colors[0]};`,
+              class: "theme-mark",
+            };
+          }
+
+          // For multiple colors, create a gradient border
+          const gradientStops = colors
+            .map((color, index) => {
+              const start = (index / colors.length) * 100;
+              const end = ((index + 1) / colors.length) * 100;
+              return `${color} ${start}% ${end}%`;
+            })
+            .join(", ");
+
           return {
-            "data-theme-color": attributes.color,
-            style: `border-bottom: 2px solid ${attributes.color}`,
+            "data-theme-color": JSON.stringify(colors),
+            style: `position: relative;
+            padding-bottom: 1px;
+            --theme-gradient: ${gradientStops};`,
+            class: "theme-mark theme-mark-gradient",
           };
         },
       },

@@ -19,6 +19,39 @@ export const CodeGroupMenu = ({
     const text = editor.state.doc.textBetween(from, to);
     const codeTheme = codes.find((code) => code.id === codeId);
     if (!codeTheme) return;
+
+    // Get existing theme marks in the selection
+    const existingMarks = editor.state.doc.rangeHasMark(
+      from,
+      to,
+      editor.schema.marks.themeMark
+    );
+    let currentColors: string[] = [];
+
+    if (existingMarks) {
+      // Get all theme marks in the selection
+      editor.state.doc.nodesBetween(from, to, (node) => {
+        if (node.marks) {
+          node.marks.forEach((mark) => {
+            if (mark.type.name === "themeMark" && mark.attrs.color) {
+              const colors = Array.isArray(mark.attrs.color)
+                ? mark.attrs.color
+                : [mark.attrs.color];
+              currentColors = [...new Set([...currentColors, ...colors])];
+            }
+          });
+        }
+      });
+    }
+
+    // If the color already exists, do nothing
+    if (currentColors.includes(codeTheme.color)) {
+      return;
+    }
+
+    // Add the new color
+    currentColors.push(codeTheme.color);
+
     controls.addCodeSelection(codeId, {
       start: from,
       end: to,
@@ -29,7 +62,7 @@ export const CodeGroupMenu = ({
     editor
       .chain()
       .focus()
-      .setThemeMark({ themeId: codeTheme.id, color: codeTheme.color })
+      .setThemeMark({ themeId: codeTheme.id, color: currentColors })
       .run();
   };
 

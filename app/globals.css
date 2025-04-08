@@ -143,8 +143,7 @@ h3.tiptap-heading + h2.tiptap-heading {
 .theme-mark {
   background: transparent;
   position: relative;
-  display: inline-block;
-  border-radius: 2px;
+  display: inline;
   padding: 0 2px;
   margin: 0 -2px;
 }
@@ -152,10 +151,19 @@ h3.tiptap-heading + h2.tiptap-heading {
 .theme-mark::after {
   content: "";
   position: absolute;
-  bottom: -1px;
+  bottom: 0;
   left: 0;
   right: 0;
-  height: 1px;
+  height: 2px;
   background-color: var(--theme-color, currentColor);
-  opacity: 0.4;
+  transition: height 0.2s ease;
+}
+
+.theme-mark:hover::after {
+  height: 4px;
+}
+
+.theme-mark-gradient::after {
+  background-image: linear-gradient(to right, var(--theme-gradient));
+  background-color: transparent;
 }
