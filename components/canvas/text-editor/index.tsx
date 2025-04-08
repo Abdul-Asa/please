@@ -98,7 +98,7 @@ const Editor = ({
       editor.setEditable(isExpanded || false);
     }
     if (isExpanded) {
-      editor?.chain().focus("end").run();
+      editor?.chain().focus("end").unsetThemeMark().run();
     }
   }, [isExpanded, editor]);
 

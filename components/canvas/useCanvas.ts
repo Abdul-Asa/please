@@ -342,6 +342,7 @@ export function useCanvas() {
     setViewport((prev) => ({
       ...prev,
       selectedNodeId: newNode.id,
+      lastSelectedNodeId: newNode.id,
     }));
     return newNode;
   };
@@ -388,6 +389,7 @@ export function useCanvas() {
     setViewport((prev) => ({
       ...prev,
       selectedNodeId: newNode.id,
+      lastSelectedNodeId: newNode.id,
     }));
     return newNode;
   };
@@ -410,6 +412,7 @@ export function useCanvas() {
     setViewport((prev) => ({
       ...prev,
       selectedNodeId: newNode.id,
+      lastSelectedNodeId: newNode.id,
     }));
     return newNode;
   };
@@ -439,6 +442,7 @@ export function useCanvas() {
           prev.selectedNodeId === nodeId ? "" : prev.selectedNodeId,
         lastSelectedNodeId:
           prev.lastSelectedNodeId === nodeId ? "" : prev.lastSelectedNodeId,
+        expandedNodeId: "",
       }));
     }
   };
