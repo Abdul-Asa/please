@@ -13,3 +13,5 @@ export * from "./strikethrough";
 export * from "./undo";
 export * from "./toolbar-provider";
 export * from "./codegroup-menu";
+export * from "./unmark";
+export * from "./theme-mark-bubble";

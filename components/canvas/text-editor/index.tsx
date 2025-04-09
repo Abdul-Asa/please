@@ -22,6 +22,8 @@ import {
   UndoToolbar,
   ToolbarProvider,
   CodeGroupMenu,
+  UnmarkToolbar,
+  ThemeMarkBubble,
 } from "./toolbar";
 
 const extensions = [
@@ -113,6 +115,7 @@ const Editor = ({
       )}
     >
       {editor && <CodeGroupMenu editor={editor} nodeId={nodeId} />}
+      {editor && <ThemeMarkBubble editor={editor} />}
 
       {isEditable && (
         <div className="flex w-full items-center overflow-scroll py-2 px-2 justify-between border-b sticky top-0 left-0 bg-background z-20">
@@ -132,6 +135,8 @@ const Editor = ({
               <HorizontalRuleToolbar />
               <BlockquoteToolbar />
               <HardBreakToolbar />
+              <Separator orientation="vertical" className="h-7" />
+              <UnmarkToolbar />
             </div>
           </ToolbarProvider>
         </div>

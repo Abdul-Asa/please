@@ -26,6 +26,7 @@ export const CodeGroupMenu = ({
       to,
       editor.schema.marks.themeMark
     );
+    let currentThemeIds: string[] = [];
     let currentColors: string[] = [];
 
     if (existingMarks) {
@@ -33,23 +34,34 @@ export const CodeGroupMenu = ({
       editor.state.doc.nodesBetween(from, to, (node) => {
         if (node.marks) {
           node.marks.forEach((mark) => {
-            if (mark.type.name === "themeMark" && mark.attrs.color) {
-              const colors = Array.isArray(mark.attrs.color)
-                ? mark.attrs.color
-                : [mark.attrs.color];
-              currentColors = [...new Set([...currentColors, ...colors])];
+            if (mark.type.name === "themeMark") {
+              if (mark.attrs.themeId) {
+                const themeIds = Array.isArray(mark.attrs.themeId)
+                  ? mark.attrs.themeId
+                  : [mark.attrs.themeId];
+                currentThemeIds = [
+                  ...new Set([...currentThemeIds, ...themeIds]),
+                ];
+              }
+              if (mark.attrs.color) {
+                const colors = Array.isArray(mark.attrs.color)
+                  ? mark.attrs.color
+                  : [mark.attrs.color];
+                currentColors = [...new Set([...currentColors, ...colors])];
+              }
             }
           });
         }
       });
     }
 
-    // If the color already exists, do nothing
-    if (currentColors.includes(codeTheme.color)) {
+    // If the theme ID already exists, do nothing
+    if (currentThemeIds.includes(codeTheme.id)) {
       return;
     }
 
-    // Add the new color
+    // Add the new theme ID and color
+    currentThemeIds.push(codeTheme.id);
     currentColors.push(codeTheme.color);
 
     controls.addCodeSelection(codeId, {
@@ -62,7 +74,7 @@ export const CodeGroupMenu = ({
     editor
       .chain()
       .focus()
-      .setThemeMark({ themeId: codeTheme.id, color: currentColors })
+      .setThemeMark({ themeId: currentThemeIds, color: currentColors })
       .run();
   };
 
@@ -74,9 +86,8 @@ export const CodeGroupMenu = ({
         const { from, to } = editor.state.selection;
         const text = editor.state.doc.textBetween(from, to);
         return (
-          !editor.state.selection.empty &&
-          text.trim().length > 0 &&
-          !editor.isFocused
+          !editor.state.selection.empty && text.trim().length > 0
+          //&& !editor.isFocused
         );
       }}
       className="bg-white shadow-md rounded-md p-2 flex flex-col gap-1 items-start min-w-[200px]"

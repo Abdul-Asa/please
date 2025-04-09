@@ -2,13 +2,14 @@ import { Mark, mergeAttributes } from "@tiptap/core";
 
 export interface ThemeMarkOptions {
   HTMLAttributes: Record<string, any>;
+  onThemeMarkClick?: (themeIds: string[], colors: string[]) => void;
 }
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     themeMark: {
       setThemeMark: (attributes: {
-        themeId: string;
+        themeId: string | string[];
         color: string | string[];
       }) => ReturnType;
       unsetThemeMark: () => ReturnType;
@@ -22,6 +23,7 @@ export const ThemeMark = Mark.create<ThemeMarkOptions>({
   addOptions() {
     return {
       HTMLAttributes: {},
+      onThemeMarkClick: undefined,
     };
   },
 
@@ -29,13 +31,24 @@ export const ThemeMark = Mark.create<ThemeMarkOptions>({
     return {
       themeId: {
         default: null,
-        parseHTML: (element) => element.getAttribute("data-theme-id"),
+        parseHTML: (element) => {
+          const themeIdAttr = element.getAttribute("data-theme-id");
+          if (!themeIdAttr) return null;
+          try {
+            return JSON.parse(themeIdAttr);
+          } catch {
+            return themeIdAttr;
+          }
+        },
         renderHTML: (attributes) => {
           if (!attributes.themeId) {
             return {};
           }
+          const themeIds = Array.isArray(attributes.themeId)
+            ? attributes.themeId
+            : [attributes.themeId];
           return {
-            "data-theme-id": attributes.themeId,
+            "data-theme-id": JSON.stringify(themeIds),
           };
         },
       },
@@ -63,9 +76,7 @@ export const ThemeMark = Mark.create<ThemeMarkOptions>({
           if (colors.length === 1) {
             return {
               "data-theme-color": JSON.stringify(colors),
-              style: `position: relative;
-              padding-bottom: 1px;
-              --theme-color: ${colors[0]};`,
+              style: `--theme-gradient: ${colors[0]};`,
               class: "theme-mark",
             };
           }
@@ -81,10 +92,8 @@ export const ThemeMark = Mark.create<ThemeMarkOptions>({
 
           return {
             "data-theme-color": JSON.stringify(colors),
-            style: `position: relative;
-            padding-bottom: 1px;
-            --theme-gradient: ${gradientStops};`,
-            class: "theme-mark theme-mark-gradient",
+            style: `--theme-gradient: ${gradientStops};`,
+            class: "theme-mark",
           };
         },
       },

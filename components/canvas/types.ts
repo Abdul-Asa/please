@@ -87,3 +87,11 @@ export interface CodeGroup {
   name: string;
   codes: Code[];
 }
+
+export interface ThemeMark {
+  nodeId: string;
+  from: number;
+  to: number;
+  themeIds: string[];
+  colors: string[];
+}
