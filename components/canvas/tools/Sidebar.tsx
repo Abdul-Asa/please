@@ -5,6 +5,7 @@ import { TypeIcon } from "lucide-react";
 import { useCanvas } from "../useCanvas";
 import { motion } from "motion/react";
 import { AddCodeDialog } from "../dialogs/AddCodeDialog";
+import { AddFileDialog } from "../dialogs/AddFileDialog";
 
 export function CanvasSidebar() {
   const { canvas, controls } = useCanvas();
@@ -34,6 +35,9 @@ export function CanvasSidebar() {
       >
         <TypeIcon size={20} />
       </Button>
+
+      {/* Add File */}
+      <AddFileDialog />
 
       {/* Add Code */}
       <AddCodeDialog />

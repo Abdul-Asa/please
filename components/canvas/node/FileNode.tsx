@@ -1,23 +1,15 @@
-import { FileTextIcon, Loader2, XIcon, FileIcon } from "lucide-react";
-import { FileContent } from "../types";
-import { getFileContent } from "../store";
-import { FileNode } from "../types";
 import { useEffect, useState } from "react";
-import { Editor } from "../text-editor";
+import { FileContent, FileNode } from "../types";
 import { useCanvas } from "../useCanvas";
+import { FileTextIcon } from "lucide-react";
+import { getFileContent, storeFileContent } from "../store";
+import { Editor } from "../text-editor";
 
-export function FileNodeContent({
-  node,
-  isExpanded = false,
-}: {
-  node: FileNode;
-  isExpanded?: boolean;
-}) {
-  const [fileContent, setFileContent] = useState<FileContent | undefined>();
-  const [loading, setLoading] = useState(true);
+export function FileNodeContent({ node }: { node: FileNode }) {
+  const { canvas } = useCanvas();
+  const [fileContent, setFileContent] = useState<FileContent>();
   const [error, setError] = useState<string | null>(null);
-  const { controls } = useCanvas();
-
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const fetchFileContent = async () => {
       try {
@@ -32,20 +24,16 @@ export function FileNodeContent({
         setLoading(false);
       }
     };
-
     fetchFileContent();
-  }, [node.id]);
+  }, [node.fileType, node.file]);
 
-  const handleTextContentChange = (newContent: string) => {
+  const handleContentChange = (newContent: string) => {
     if (fileContent?.type === "text") {
-      // Update the file content in the store
       setFileContent({
         ...fileContent,
         content: newContent,
       });
-
-      // If there's a need to save this to a backend or persistent storage,
-      // that would be implemented here
+      storeFileContent(fileContent);
     }
   };
 
@@ -90,60 +78,12 @@ export function FileNodeContent({
 
   if (fileContent.type === "text") {
     return (
-      <div className="h-full w-full">
-        {isExpanded ? (
-          <Editor
-            content={fileContent.content as string}
-            onChange={handleTextContentChange}
-            nodeId={node.id}
-          />
-        ) : (
-          <div
-            className="p-2 prose prose-sm max-w-none overflow-auto max-h-[300px]"
-            dangerouslySetInnerHTML={{ __html: fileContent.content as string }}
-          />
-        )}
-      </div>
+      <Editor
+        content={fileContent.content as string}
+        onChange={handleContentChange}
+        nodeId={node.id}
+        viewport={canvas.viewport}
+      />
     );
   }
-
-  if (fileContent.type === "pdf") {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-2">
-        <div className="w-full h-full overflow-auto flex justify-center">
-          <iframe
-            src={fileContent.content as string}
-            className="w-full h-full border-0"
-            title={fileContent.name || "PDF Document"}
-            sandbox="allow-scripts allow-same-origin"
-          >
-            <div className="flex flex-col items-center justify-center h-full gap-2">
-              <p className="text-sm text-destructive">
-                Unable to display PDF.{" "}
-                <a
-                  href={fileContent.content as string}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  Download instead
-                </a>
-              </p>
-            </div>
-          </iframe>
-        </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          {fileContent.name} ({(fileContent.size / 1024).toFixed(1)} KB)
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col items-center justify-center h-full gap-2">
-      <FileIcon className="w-8 h-8 text-muted-foreground" />
-      <p className="text-sm">{fileContent.name}</p>
-      <p className="text-xs text-muted-foreground">{fileContent.type}</p>
-    </div>
-  );
 }

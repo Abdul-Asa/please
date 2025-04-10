@@ -25,6 +25,7 @@ export const defaultViewport: Viewport = {
   panStartY: 0,
   isDragging: false,
   isPanning: false,
+  isScrolling: false,
   selectedNodeId: "",
   lastSelectedNodeId: "",
   expandedNodeId: "",

@@ -21,6 +21,7 @@ export const readFileContent = (file: File): Promise<string> => {
           .split("\n")
           .map((line) => `<p>${line}</p>`)
           .join("");
+        console.log(html);
         resolve(html);
       };
     } else if (
@@ -34,6 +35,7 @@ export const readFileContent = (file: File): Promise<string> => {
         try {
           const arrayBuffer = reader.result as ArrayBuffer;
           const result = await mammoth.convertToHtml({ arrayBuffer });
+          console.log(result.value);
           resolve(result.value);
         } catch (error) {
           reject(error);
@@ -44,6 +46,7 @@ export const readFileContent = (file: File): Promise<string> => {
       reader.onload = () => {
         const markdown = reader.result as string;
         const html = marked(markdown);
+        console.log(html);
         resolve(html);
       };
     } else {

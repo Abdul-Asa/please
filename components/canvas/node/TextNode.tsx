@@ -1,16 +1,9 @@
-import { useEffect } from "react";
 import { TextNode } from "../types";
 import { useCanvas } from "../useCanvas";
 import { Editor } from "../text-editor";
 
-export function TextNodeContent({
-  node,
-  isExpanded,
-}: {
-  node: TextNode;
-  isExpanded: boolean;
-}) {
-  const { controls } = useCanvas();
+export function TextNodeContent({ node }: { node: TextNode }) {
+  const { controls, canvas } = useCanvas();
 
   const handleContentChange = (newContent: string) => {
     controls.updateNode(node.id, { text: newContent });
@@ -20,8 +13,8 @@ export function TextNodeContent({
     <Editor
       content={node.text}
       onChange={handleContentChange}
-      isExpanded={isExpanded}
       nodeId={node.id}
+      viewport={canvas.viewport}
     />
   );
 }

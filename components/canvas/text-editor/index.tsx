@@ -25,8 +25,8 @@ import {
   UnmarkToolbar,
   ThemeMarkBubble,
 } from "./toolbar";
-import { AnimatePresence, motion } from "motion/react";
-
+import { motion } from "motion/react";
+import { Viewport } from "../types";
 const extensions = [
   StarterKit.configure({
     orderedList: {
@@ -74,15 +74,17 @@ interface EditorProps {
   className?: string;
   isExpanded?: boolean;
   nodeId: string;
+  viewport: Viewport;
 }
 
 const Editor = ({
   content,
   onChange,
   className,
-  isExpanded,
   nodeId,
+  viewport,
 }: EditorProps) => {
+  const isExpanded = viewport.expandedNodeId === nodeId;
   const [isEditable, setIsEditable] = useState(isExpanded || false);
 
   const editor = useEditor({
@@ -143,6 +145,16 @@ const Editor = ({
       )}
       <motion.div
         layout="position"
+        transition={{
+          type: "spring",
+          stiffness: 250,
+          damping: 35,
+          mass: 1.2,
+          duration:
+            viewport.isDragging || viewport.isPanning || viewport.isScrolling
+              ? 0
+              : 0.4,
+        }}
         onClick={() => {
           editor?.chain().focus().run();
         }}

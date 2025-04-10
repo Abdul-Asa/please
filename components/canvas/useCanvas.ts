@@ -39,6 +39,7 @@ export function useCanvas() {
   const [viewport, setViewport] = useAtom(viewportAtom);
   const [codes, setCodes] = useAtom(codesAtom);
   const [codeGroups, setCodeGroups] = useAtom(codeGroupsAtom);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Zoom functions
   const zoomIn = () => {
@@ -115,6 +116,25 @@ export function useCanvas() {
     }
     e.preventDefault();
     if (viewport.panMode || viewport.expandedNodeId !== "") return;
+
+    // Clear any existing timeout
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    // Set scrolling to true
+    setViewport((prev) => ({
+      ...prev,
+      isScrolling: true,
+    }));
+
+    // Set a timeout to set isScrolling back to false
+    scrollTimeoutRef.current = setTimeout(() => {
+      setViewport((prev) => ({
+        ...prev,
+        isScrolling: false,
+      }));
+    }, 150); // 150ms delay
 
     // Handle pinch-zoom (trackpad or Ctrl+wheel)
     if (e.ctrlKey || e.metaKey) {
@@ -515,6 +535,15 @@ export function useCanvas() {
       window.removeEventListener("mousemove", handleGlobalNodeDrag);
     };
   }, [viewport.isDragging, viewport.selectedNodeId, handleNodeDrag]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return {
     canvas: { nodes, viewport, codes, codeGroups },

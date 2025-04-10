@@ -3,6 +3,7 @@ import { BubbleMenu, Editor } from "@tiptap/react";
 import { useCanvas } from "../../useCanvas";
 import { Button } from "@/components/ui/button";
 import type { Code } from "../../types";
+import { OctagonXIcon } from "lucide-react";
 
 export const CodeGroupMenu = ({
   editor,
@@ -81,8 +82,14 @@ export const CodeGroupMenu = ({
           //&& !editor.isFocused
         );
       }}
-      className="bg-white shadow-md rounded-md p-2 flex flex-col gap-1 items-start min-w-[200px]"
+      className="bg-white shadow-md border rounded-md p-2 flex flex-col gap-1 items-start min-w-[200px]"
     >
+      {codes.length === 0 && (
+        <div className="w-full flex flex-col items-center justify-center gap-2">
+          <OctagonXIcon className="size-8 text-muted-foreground" />{" "}
+          <p className="text-sm text-muted-foreground">No codes available</p>
+        </div>
+      )}
       {codes.map((code: Code) => (
         <Button
           key={code.id}

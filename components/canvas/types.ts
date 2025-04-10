@@ -32,6 +32,7 @@ export interface Viewport {
   panStartY: number;
   isDragging: boolean;
   isPanning: boolean;
+  isScrolling: boolean;
   selectedNodeId: string;
   lastSelectedNodeId: string;
   expandedNodeId: string;
@@ -52,7 +53,7 @@ export interface CanvasData {
 export interface FileContent {
   id: string;
   name: string;
-  type: string;
+  type: FileType;
   content: string | ArrayBuffer;
   size: number;
   lastModified: number;

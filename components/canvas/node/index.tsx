@@ -86,6 +86,7 @@ function CanvasNode({ node }: { node: Node }) {
         isSelected && "border-ring"
       )}
       layout
+      layoutId={`${node.id}-container`}
       style={{
         minWidth: node.width,
         minHeight: node.height,
@@ -102,7 +103,10 @@ function CanvasNode({ node }: { node: Node }) {
         stiffness: 250,
         damping: 35,
         mass: 1.2,
-        duration: viewport.isDragging || viewport.isPanning ? 0 : 0.4,
+        duration:
+          viewport.isDragging || viewport.isPanning || viewport.isScrolling
+            ? 0
+            : 0.4,
       }}
     >
       <div
@@ -112,7 +116,21 @@ function CanvasNode({ node }: { node: Node }) {
         )}
         onMouseDown={(e) => !isPanMode && startNodeDrag(e, node.id)}
       >
-        <motion.div layout="position" className="flex items-center">
+        <motion.div
+          layout="position"
+          layoutId={`${node.id}-label`}
+          transition={{
+            type: "spring",
+            stiffness: 250,
+            damping: 35,
+            mass: 1.2,
+            duration:
+              viewport.isDragging || viewport.isPanning || viewport.isScrolling
+                ? 0
+                : 0.4,
+          }}
+          className="flex items-center"
+        >
           {node.type === "text" && <TypeIcon size={16} className="mx-2" />}
           {node.type === "file" && node.fileType === "image" && (
             <ImageIcon size={16} className="mx-2" />
@@ -138,6 +156,7 @@ function CanvasNode({ node }: { node: Node }) {
           </div>
         </motion.div>
         <motion.div
+          layoutId={`${node.id}-controls`}
           layout="position"
           className="flex items-center"
           transition={{
@@ -145,6 +164,10 @@ function CanvasNode({ node }: { node: Node }) {
             stiffness: 250,
             damping: 35,
             mass: 1.2,
+            duration:
+              viewport.isDragging || viewport.isPanning || viewport.isScrolling
+                ? 0
+                : 0.4,
           }}
         >
           <Button
@@ -177,12 +200,8 @@ function CanvasNode({ node }: { node: Node }) {
           </Button>
         </motion.div>
       </div>
-      {node.type === "text" && (
-        <TextNodeContent node={node as TextNode} isExpanded={isExpanded} />
-      )}
-      {node.type === "file" && (
-        <FileNodeContent node={node as FileNode} isExpanded={isExpanded} />
-      )}
+      {node.type === "text" && <TextNodeContent node={node as TextNode} />}
+      {node.type === "file" && <FileNodeContent node={node as FileNode} />}
     </motion.div>
   );
 }
