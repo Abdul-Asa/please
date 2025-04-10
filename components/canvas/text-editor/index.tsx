@@ -25,6 +25,7 @@ import {
   UnmarkToolbar,
   ThemeMarkBubble,
 } from "./toolbar";
+import { AnimatePresence, motion } from "motion/react";
 
 const extensions = [
   StarterKit.configure({
@@ -116,9 +117,8 @@ const Editor = ({
     >
       {editor && <CodeGroupMenu editor={editor} nodeId={nodeId} />}
       {editor && <ThemeMarkBubble editor={editor} />}
-
       {isEditable && (
-        <div className="flex w-full items-center overflow-scroll py-2 px-2 justify-between border-b sticky top-0 left-0 bg-background z-20">
+        <div className="flex w-full items-center overflow-hidden py-2 px-2 justify-between border-b sticky top-0 left-0 bg-background z-20">
           <ToolbarProvider editor={editor}>
             <div className="flex items-center gap-2">
               <UndoToolbar />
@@ -141,8 +141,8 @@ const Editor = ({
           </ToolbarProvider>
         </div>
       )}
-
-      <div
+      <motion.div
+        layout="position"
         onClick={() => {
           editor?.chain().focus().run();
         }}
@@ -152,7 +152,7 @@ const Editor = ({
           className="outline-none flex-1 h-full w-full"
           editor={editor}
         />
-      </div>
+      </motion.div>
     </div>
   );
 };

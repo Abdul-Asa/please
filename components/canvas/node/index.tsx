@@ -112,7 +112,7 @@ function CanvasNode({ node }: { node: Node }) {
         )}
         onMouseDown={(e) => !isPanMode && startNodeDrag(e, node.id)}
       >
-        <div className="flex items-center">
+        <motion.div layout="position" className="flex items-center">
           {node.type === "text" && <TypeIcon size={16} className="mx-2" />}
           {node.type === "file" && node.fileType === "image" && (
             <ImageIcon size={16} className="mx-2" />
@@ -136,8 +136,17 @@ function CanvasNode({ node }: { node: Node }) {
               {node.label || node.type}
             </span>
           </div>
-        </div>
-        <div className="flex items-center">
+        </motion.div>
+        <motion.div
+          layout="position"
+          className="flex items-center"
+          transition={{
+            type: "spring",
+            stiffness: 250,
+            damping: 35,
+            mass: 1.2,
+          }}
+        >
           <Button
             variant={"ghost"}
             size={"icon"}
@@ -166,7 +175,7 @@ function CanvasNode({ node }: { node: Node }) {
           >
             <Trash2Icon />
           </Button>
-        </div>
+        </motion.div>
       </div>
       {node.type === "text" && (
         <TextNodeContent node={node as TextNode} isExpanded={isExpanded} />
