@@ -6,17 +6,15 @@ import type { Code } from "../../types";
 
 export const CodeGroupMenu = ({
   editor,
-  nodeId,
 }: {
   editor: Editor;
   nodeId: string;
 }) => {
-  const { canvas, controls } = useCanvas();
+  const { canvas } = useCanvas();
   const { codes } = canvas;
 
   const handleCodeSelect = (codeId: string) => {
     const { from, to } = editor.state.selection;
-    const text = editor.state.doc.textBetween(from, to);
     const codeTheme = codes.find((code) => code.id === codeId);
     if (!codeTheme) return;
 
@@ -63,13 +61,6 @@ export const CodeGroupMenu = ({
     // Add the new theme ID and color
     currentThemeIds.push(codeTheme.id);
     currentColors.push(codeTheme.color);
-
-    controls.addCodeSelection(codeId, {
-      start: from,
-      end: to,
-      text,
-      nodeId,
-    });
 
     editor
       .chain()

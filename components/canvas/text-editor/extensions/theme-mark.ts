@@ -1,4 +1,5 @@
 import { Mark, mergeAttributes } from "@tiptap/core";
+import { Plugin } from "prosemirror-state";
 
 export interface ThemeMarkOptions {
   HTMLAttributes: Record<string, any>;
@@ -120,12 +121,18 @@ export const ThemeMark = Mark.create<ThemeMarkOptions>({
     return {
       setThemeMark:
         (attributes) =>
-        ({ commands }) => {
+        ({ commands, editor }) => {
+          const { from, to } = editor.state.selection;
+          const text = editor.state.doc.textBetween(from, to);
+          console.log(`Marked word: "${text}" at position ${from}-${to}`);
           return commands.setMark(this.name, attributes);
         },
       unsetThemeMark:
         () =>
-        ({ commands }) => {
+        ({ commands, editor }) => {
+          const { from, to } = editor.state.selection;
+          const text = editor.state.doc.textBetween(from, to);
+          console.log(`Unmarked word: "${text}" at position ${from}-${to}`);
           return commands.unsetMark(this.name);
         },
     };

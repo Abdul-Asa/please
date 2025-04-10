@@ -20,7 +20,6 @@ import type {
   Viewport,
   FileContent,
   Code,
-  CodeSelection,
 } from "./types";
 import { nanoid } from "nanoid";
 import { readFileContent } from "./utils";
@@ -452,7 +451,6 @@ export function useCanvas() {
     const newCode: Code = {
       ...code,
       id: nanoid(),
-      selections: [],
     };
     setCodes((prev) => [...prev, newCode]);
     return newCode;
@@ -466,31 +464,6 @@ export function useCanvas() {
 
   const deleteCode = (codeId: string) => {
     setCodes((prev) => prev.filter((code) => code.id !== codeId));
-  };
-
-  const addCodeSelection = (codeId: string, selection: CodeSelection) => {
-    setCodes((prev) =>
-      prev.map((code) =>
-        code.id === codeId
-          ? { ...code, selections: [...code.selections, selection] }
-          : code
-      )
-    );
-  };
-
-  const removeCodeSelection = (codeId: string, selectionIndex: number) => {
-    setCodes((prev) =>
-      prev.map((code) =>
-        code.id === codeId
-          ? {
-              ...code,
-              selections: code.selections.filter(
-                (_, i) => i !== selectionIndex
-              ),
-            }
-          : code
-      )
-    );
   };
 
   // Initialize the canvas
@@ -585,8 +558,6 @@ export function useCanvas() {
       addCode,
       updateCode,
       deleteCode,
-      addCodeSelection,
-      removeCodeSelection,
     },
     dragHandlers: {
       startNodeDrag,

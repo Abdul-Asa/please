@@ -20,8 +20,6 @@ export const ThemeMarkBubble = ({ editor }: ThemeMarkBubbleProps) => {
 
   const handleThemeMarkClick = useCallback(
     (themeIds: string[], colors: string[]) => {
-      console.log("Theme IDs:", themeIds);
-      console.log("Colors:", colors);
       setThemeIds(themeIds);
       setColors(colors);
       setIsVisible(true);
@@ -67,9 +65,9 @@ export const ThemeMarkBubble = ({ editor }: ThemeMarkBubbleProps) => {
   if (!isVisible) return null;
 
   return (
-    <div className="absolute bg-white shadow-md rounded-md p-2 flex flex-col gap-1 items-start min-w-[200px] z-50">
+    <div className="absolute top-0 right-0 bg-white shadow-md rounded-md p-2 flex flex-col gap-1 items-start min-w-[200px] z-50">
       <div className="flex items-center justify-between w-full">
-        <h3 className="font-semibold">Theme Marks</h3>
+        <h3 className="font-semibold">Codes</h3>
         <Button
           variant="ghost"
           size="icon"

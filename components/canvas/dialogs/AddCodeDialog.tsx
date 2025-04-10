@@ -30,7 +30,6 @@ export function AddCodeDialog() {
       name: name.trim(),
       comment: comment.trim(),
       color,
-      selections: [],
     };
 
     controls.addCode(newCode);
