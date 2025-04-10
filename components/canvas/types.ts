@@ -1,4 +1,4 @@
-export type NodeType = "text" | "file" | "sticky";
+export type NodeType = "text" | "file";
 export type FileType = "image" | "pdf" | "text";
 
 interface BaseNode {
@@ -22,12 +22,7 @@ export interface FileNode extends BaseNode {
   fileType: FileType;
 }
 
-export interface StickyNode extends BaseNode {
-  type: "sticky";
-  text: string;
-}
-
-export type Node = TextNode | FileNode | StickyNode;
+export type Node = TextNode | FileNode;
 
 export interface Viewport {
   scale: number;

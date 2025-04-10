@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { CanvasContextType, CanvasData } from "./types";
 import { createContext, ReactNode } from "react";
 import { CanvasSidebar } from "./tools/Sidebar";
+import { CanvasControls } from "./tools/Controls";
 
 // Context for the canvas
 export const CanvasContext = createContext<CanvasContextType | null>(null);
@@ -65,6 +66,7 @@ function CanvasContent() {
           <CanvasNodes />
         )}
         <CanvasSidebar />
+        <CanvasControls />
         {/* <div className="absolute left-0 bottom-0 p-4 size-[400px] overflow-scroll pointer-events-none">
           <pre>{JSON.stringify(canvas.nodes, null, 2)}</pre>
         </div> */}

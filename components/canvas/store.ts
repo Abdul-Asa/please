@@ -1,12 +1,5 @@
 import { atomWithStorage } from "jotai/utils";
-import type {
-  FileContent,
-  Node,
-  Viewport,
-  Code,
-  CodeGroup,
-  ThemeMark,
-} from "./types";
+import type { FileContent, Node, Viewport, Code, CodeGroup } from "./types";
 import { defaultViewport } from "./constants";
 import Dexie from "dexie";
 // Persistent atoms

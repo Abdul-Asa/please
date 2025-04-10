@@ -4,17 +4,34 @@ import { Minus, Plus, RotateCcw, Move, Box } from "lucide-react";
 import { useCanvas } from "../useCanvas";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/ui/mode-toggle";
+import { motion } from "motion/react";
 
 export function CanvasControls() {
   const { controls, canvas } = useCanvas();
   const { zoomIn, zoomOut, resetView, togglePanMode, resetToDefaultView } =
     controls;
-  const { panMode, scale } = canvas.viewport;
+  const { panMode, scale, expandedNodeId } = canvas.viewport;
+  const isExpanded = expandedNodeId !== "";
 
   return (
-    <>
+    <motion.div
+      initial={{ y: isExpanded ? -100 : 0, x: 0 }}
+      animate={{ y: isExpanded ? -100 : 0, x: 0 }}
+      exit={{ y: -100, x: 0 }}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      }}
+    >
       <div className="absolute bottom-4 lg:bottom-auto lg:top-4 left-4 flex items-center gap-1 rounded-md bg-background/90 border border-border px-2 py-1.5 backdrop-blur-sm">
-        <Button variant="ghost" size="icon" onClick={zoomOut} title="Zoom Out">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={zoomOut}
+          tooltip="Zoom Out"
+          tooltipSide="bottom"
+        >
           <Minus size={18} />
         </Button>
 
@@ -26,7 +43,13 @@ export function CanvasControls() {
           {Math.round(scale * 100)}%
         </div>
 
-        <Button variant="ghost" size="icon" onClick={zoomIn} title="Zoom In">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={zoomIn}
+          tooltip="Zoom In"
+          tooltipSide="bottom"
+        >
           <Plus size={18} />
         </Button>
 
@@ -40,7 +63,8 @@ export function CanvasControls() {
             panMode && "border-primary"
           )}
           onClick={togglePanMode}
-          title="Toggle Pan Mode"
+          tooltip="Toggle Pan Mode"
+          tooltipSide="bottom"
         >
           <Move size={18} />
         </Button>
@@ -49,18 +73,24 @@ export function CanvasControls() {
           variant="ghost"
           size="icon"
           onClick={resetView}
-          title="Reset View"
+          tooltip="Reset View"
+          tooltipSide="bottom"
         >
           <RotateCcw size={18} />
         </Button>
       </div>
       <div className="absolute top-4 right-4 flex items-center gap-1 rounded-md bg-background/90 border border-border px-2 py-1.5 backdrop-blur-sm">
-        <Button variant="ghost" size="icon" title="Toggle Grid">
+        <Button
+          variant="ghost"
+          size="icon"
+          tooltip="Toggle VR"
+          tooltipSide="bottom"
+        >
           <Box size={18} />
         </Button>
         <div className="h-6 w-px bg-border mx-1"></div>
         <ModeToggle />
       </div>
-    </>
+    </motion.div>
   );
 }

@@ -19,7 +19,7 @@ import {
 
 export function CanvasToolbar() {
   const canvas = useCanvas();
-  const { addTextNode, addFileNode, addStickyNode } = canvas.controls;
+  const { addTextNode, addFileNode } = canvas.controls;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [acceptTypes, setAcceptTypes] = useState<string>("");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -149,15 +149,6 @@ export function CanvasToolbar() {
       />
 
       <div className="h-6 w-px bg-border mx-0.5"></div>
-
-      <Button
-        variant="ghost"
-        className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-normal whitespace-nowrap"
-        onClick={addStickyNode}
-      >
-        <StickyNoteIcon size={18} />
-        <span className="md:inline hidden">Note</span>
-      </Button>
     </div>
   );
 }

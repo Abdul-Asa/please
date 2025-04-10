@@ -393,29 +393,6 @@ export function useCanvas() {
     return newNode;
   };
 
-  const addStickyNode = () => {
-    const position = getRandomPositionInViewport();
-
-    const newNode: Node = {
-      id: nanoid(),
-      type: "sticky",
-      label: "Note-" + nanoid(6),
-      text: "New note",
-      x: position.x,
-      y: position.y,
-      width: NODE_CONSTANTS.STICKY_NODE_WIDTH,
-      height: NODE_CONSTANTS.NODE_HEIGHT,
-    };
-
-    setNodes((prev) => [...prev, newNode]);
-    setViewport((prev) => ({
-      ...prev,
-      selectedNodeId: newNode.id,
-      lastSelectedNodeId: newNode.id,
-    }));
-    return newNode;
-  };
-
   const deleteNode = (nodeId: string) => {
     // Get the node before deleting it
     const nodeToDelete = nodes.find((node) => node.id === nodeId);
@@ -551,7 +528,6 @@ export function useCanvas() {
       togglePanMode,
       addTextNode,
       addFileNode,
-      addStickyNode,
       deleteNode,
       updateNode,
       updateViewport,

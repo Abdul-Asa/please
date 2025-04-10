@@ -1,11 +1,10 @@
 "use client";
 import { useCanvas } from "../useCanvas";
-import { FileNode, Node, StickyNode, TextNode } from "../types";
+import { FileNode, Node, TextNode } from "../types";
 import { cn } from "@/lib/utils";
 import { NODE_CONSTANTS } from "../constants";
 import {
   FileIcon,
-  StickyNoteIcon,
   TypeIcon,
   Trash2Icon,
   ImageIcon,
@@ -13,7 +12,6 @@ import {
 } from "lucide-react";
 import { Button } from "../../ui/button";
 import { motion } from "motion/react";
-import { Editor } from "../text-editor";
 import { TextNodeContent } from "./TextNode";
 import { FileNodeContent } from "./FileNode";
 
@@ -79,23 +77,15 @@ function CanvasNode({ node }: { node: Node }) {
     }
   };
 
-  // const selectText = (e: React.MouseEvent) => {
-  //   const selection = window.getSelection();
-  //   if (!selection) return;
-  //   const startNode = selection.getRangeAt(0).startContainer.parentNode;
-  //   const endNode = selection.getRangeAt(0).endContainer.parentNode;
-  //   console.log(selection.toString());
-  // };
-
   return (
     <motion.div
-      // onPointerUp={selectText}
       draggable={false}
       className={cn(
         "absolute node group rounded-md border-2 border-primary-light bg-background flex flex-col",
         !isPanMode && "hover:shadow-sm",
         isSelected && "border-ring"
       )}
+      layout
       style={{
         minWidth: node.width,
         minHeight: node.height,
@@ -104,19 +94,9 @@ function CanvasNode({ node }: { node: Node }) {
         maxHeight: isExpanded ? "none" : NODE_CONSTANTS.MAX_NODE_HEIGHT,
         height: isExpanded ? "calc(100vh - 2rem)" : "max-content",
         width: isExpanded ? "calc(100vw - 2rem)" : "max-content",
+        left: isExpanded ? -viewport.panOffsetX / viewport.scale + 16 : node.x,
+        top: isExpanded ? -viewport.panOffsetY / viewport.scale + 16 : node.y,
       }}
-      initial={false}
-      animate={
-        isExpanded
-          ? {
-              left: -viewport.panOffsetX / viewport.scale + 16,
-              top: -viewport.panOffsetY / viewport.scale + 16,
-            }
-          : {
-              left: node.x,
-              top: node.y,
-            }
-      }
       transition={{
         type: "spring",
         stiffness: 250,
@@ -140,9 +120,7 @@ function CanvasNode({ node }: { node: Node }) {
           {node.type === "file" && node.fileType !== "image" && (
             <FileIcon size={16} className="mx-2" />
           )}
-          {node.type === "sticky" && (
-            <StickyNoteIcon size={16} className="mx-2" />
-          )}
+
           <div className="h-6 w-px bg-border mx-0.5"></div>
           <div className="flex items-center ml-2 gap-2 max-w-[200px]">
             <span
@@ -196,41 +174,6 @@ function CanvasNode({ node }: { node: Node }) {
       {node.type === "file" && (
         <FileNodeContent node={node as FileNode} isExpanded={isExpanded} />
       )}
-      {node.type === "sticky" && (
-        <StickyNodeContent node={node as StickyNode} isExpanded={isExpanded} />
-      )}
     </motion.div>
-  );
-}
-
-function StickyNodeContent({
-  node,
-  isExpanded,
-}: {
-  node: StickyNode;
-  isExpanded?: boolean;
-}) {
-  const { controls } = useCanvas();
-
-  const handleContentChange = (newContent: string) => {
-    controls.updateNode(node.id, { text: newContent });
-  };
-
-  return (
-    <div className={cn("h-full w-full", isExpanded && "flex-1 flex flex-col")}>
-      {isExpanded ? (
-        <Editor
-          content={node.text}
-          onChange={handleContentChange}
-          className="flex-1 h-full"
-          nodeId={node.id}
-        />
-      ) : (
-        <div
-          className="p-4 bg-yellow-50 h-full overflow-auto"
-          dangerouslySetInnerHTML={{ __html: node.text }}
-        />
-      )}
-    </div>
   );
 }
