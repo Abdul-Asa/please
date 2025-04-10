@@ -5,6 +5,8 @@ import { useCanvas } from "../useCanvas";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { motion } from "motion/react";
+import { NodeManager } from "../dialogs/NodeManager";
+import { CodeManager } from "../dialogs/CodeManager";
 
 export function CanvasControls() {
   const { controls, canvas } = useCanvas();
@@ -80,6 +82,8 @@ export function CanvasControls() {
         </Button>
       </div>
       <div className="absolute top-4 right-4 flex items-center gap-1 rounded-md bg-background/90 border border-border px-2 py-1.5 backdrop-blur-sm">
+        <NodeManager />
+        <CodeManager />
         <Button
           variant="ghost"
           size="icon"
