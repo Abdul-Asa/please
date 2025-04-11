@@ -20,13 +20,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
+import { cn } from "@/lib/utils";
 export function AddCodeDialog() {
   const { controls, canvas } = useCanvas();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
-  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(true);
 
   const usedColors = canvas.codes.map((code) => code.color);
   const availableColors = PREDEFINED_COLORS.filter(
@@ -51,7 +51,10 @@ export function AddCodeDialog() {
     // Reset form
     setName("");
     setComment("");
-    setColor("#22c55e");
+    setColor(
+      availableColors[Math.floor(Math.random() * availableColors.length)]
+    );
+    setShowColorPicker(true);
     setOpen(false);
   };
 
@@ -111,11 +114,12 @@ export function AddCodeDialog() {
                           size="icon"
                           key={colorOption}
                           type="button"
-                          className={`size-5 rounded-full border-2 ${
+                          className={cn(
+                            "size-5 rounded-full border-2",
                             color === colorOption
                               ? "border-black dark:border-white"
                               : "border-transparent"
-                          }`}
+                          )}
                           style={{ backgroundColor: colorOption }}
                           onClick={() => setColor(colorOption)}
                         />

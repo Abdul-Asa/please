@@ -1,3 +1,5 @@
+import { Editor } from "@tiptap/react";
+
 export type NodeType = "text" | "file";
 export type FileType = "image" | "pdf" | "text";
 
@@ -9,6 +11,7 @@ interface BaseNode {
   width: number;
   height: number;
   label?: string;
+  editor?: Editor;
 }
 
 export interface TextNode extends BaseNode {
@@ -63,23 +66,25 @@ export interface CanvasContextType {
   initialData: CanvasData | null;
 }
 
+export interface CodeSelection {
+  nodeId: string;
+  from: number;
+  to: number;
+  text: string;
+  themeIds: string[];
+  colors: string[];
+}
+
 export interface Code {
   id: string;
   name: string;
-  comment: string;
   color: string;
+  comment?: string;
+  groupId?: string;
+  order?: number;
 }
 
 export interface CodeGroup {
   id: string;
   name: string;
-  codes: Code[];
-}
-
-export interface ThemeMark {
-  nodeId: string;
-  from: number;
-  to: number;
-  themeIds: string[];
-  colors: string[];
 }

@@ -3,7 +3,7 @@ import { useCanvas } from "../useCanvas";
 import { Editor } from "../text-editor";
 
 export function TextNodeContent({ node }: { node: TextNode }) {
-  const { controls, canvas } = useCanvas();
+  const { controls } = useCanvas();
 
   const handleContentChange = (newContent: string) => {
     controls.updateNode(node.id, { text: newContent });
@@ -14,7 +14,6 @@ export function TextNodeContent({ node }: { node: TextNode }) {
       content={node.text}
       onChange={handleContentChange}
       nodeId={node.id}
-      viewport={canvas.viewport}
     />
   );
 }

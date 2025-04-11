@@ -7,6 +7,7 @@ import {
   deleteFileContent,
   codesAtom,
   codeGroupsAtom,
+  editorsAtom,
 } from "./store";
 import {
   VIEWPORT_CONSTANTS,
@@ -20,10 +21,14 @@ import type {
   Viewport,
   FileContent,
   Code,
+  CodeGroup,
+  CodeSelection,
 } from "./types";
 import { nanoid } from "nanoid";
 import { readFileContent } from "./utils";
 import { CanvasContext } from ".";
+import { Editor } from "@tiptap/react";
+import { Node as ProseMirrorNode, Mark } from "prosemirror-model";
 const { MIN_SCALE, MAX_SCALE, ZOOM_BUTTON_FACTOR } = VIEWPORT_CONSTANTS;
 
 export function useCanvas() {
@@ -39,6 +44,8 @@ export function useCanvas() {
   const [viewport, setViewport] = useAtom(viewportAtom);
   const [codes, setCodes] = useAtom(codesAtom);
   const [codeGroups, setCodeGroups] = useAtom(codeGroupsAtom);
+  const [editors, setEditors] = useAtom(editorsAtom);
+  const [codeMarks, setCodeMarks] = useState();
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Zoom functions
@@ -453,14 +460,202 @@ export function useCanvas() {
     return newCode;
   };
 
+  const addCodeGroup = (group: Omit<CodeGroup, "id">) => {
+    const newGroup: CodeGroup = {
+      ...group,
+      id: nanoid(),
+    };
+    setCodeGroups((prev) => [...prev, newGroup]);
+    return newGroup;
+  };
+
   const updateCode = (codeId: string, update: Partial<Code>) => {
     setCodes((prev) =>
       prev.map((code) => (code.id === codeId ? { ...code, ...update } : code))
     );
   };
 
+  const updateCodeGroup = (groupId: string, update: Partial<CodeGroup>) => {
+    setCodeGroups((prev) =>
+      prev.map((group) =>
+        group.id === groupId ? { ...group, ...update } : group
+      )
+    );
+  };
+
   const deleteCode = (codeId: string) => {
+    // Remove the code from the codes array
     setCodes((prev) => prev.filter((code) => code.id !== codeId));
+
+    // Remove theme marks from all editors
+    editors.forEach((editor) => {
+      if (editor) {
+        // Get all theme marks in the document
+        editor.state.doc.descendants((node, pos) => {
+          if (node.marks) {
+            node.marks.forEach((mark) => {
+              if (mark.type.name === "themeMark" && mark.attrs.themeId) {
+                const themeIds = Array.isArray(mark.attrs.themeId)
+                  ? mark.attrs.themeId
+                  : [mark.attrs.themeId];
+
+                // If the deleted code's ID is in the theme marks
+                if (themeIds.includes(codeId)) {
+                  // Remove the code ID from the theme marks
+                  const newThemeIds = themeIds.filter((id) => id !== codeId);
+                  const newColors = Array.isArray(mark.attrs.color)
+                    ? mark.attrs.color.filter(
+                        (_, index) => themeIds[index] !== codeId
+                      )
+                    : mark.attrs.color;
+
+                  // If there are no theme IDs left, remove the mark
+                  if (newThemeIds.length === 0) {
+                    editor
+                      .chain()
+                      .focus()
+                      .setTextSelection({ from: pos, to: pos + node.nodeSize })
+                      .unsetThemeMark()
+                      .run();
+                  } else {
+                    // Otherwise update the mark with the remaining theme IDs
+                    editor
+                      .chain()
+                      .focus()
+                      .setTextSelection({ from: pos, to: pos + node.nodeSize })
+                      .setThemeMark({ themeId: newThemeIds, color: newColors })
+                      .run();
+                  }
+                }
+              }
+            });
+          }
+        });
+      }
+    });
+  };
+
+  const deleteCodeGroup = (groupId: string) => {
+    setCodeGroups((prev) => prev.filter((group) => group.id !== groupId));
+  };
+
+  const getCodeSelections = (codeId: string): CodeSelection[] => {
+    const selections: CodeSelection[] = [];
+
+    editors.forEach((editor: Editor | undefined, nodeId: string) => {
+      if (!editor) return;
+
+      editor.state.doc.descendants((node: ProseMirrorNode, pos: number) => {
+        if (node.marks) {
+          node.marks.forEach((mark: Mark) => {
+            if (mark.type.name === "themeMark" && mark.attrs.themeId) {
+              const themeIds = Array.isArray(mark.attrs.themeId)
+                ? mark.attrs.themeId
+                : [mark.attrs.themeId];
+
+              const colors = Array.isArray(mark.attrs.color)
+                ? mark.attrs.color
+                : [mark.attrs.color];
+
+              if (themeIds.includes(codeId)) {
+                selections.push({
+                  nodeId,
+                  text: node.textContent,
+                  from: pos,
+                  to: pos + node.nodeSize,
+                  themeIds,
+                  colors,
+                });
+              }
+            }
+          });
+        }
+      });
+    });
+
+    return selections;
+  };
+
+  const getCodesByGroup = () => {
+    const groupedCodes = new Map<string, Code[]>();
+    const ungroupedCodes: Code[] = [];
+
+    // Initialize groups
+    codeGroups.forEach((group) => {
+      groupedCodes.set(group.id, []);
+    });
+
+    // Sort codes into groups
+    codes.forEach((code) => {
+      if (code.groupId) {
+        const groupCodes = groupedCodes.get(code.groupId);
+        if (groupCodes) {
+          groupCodes.push(code);
+        }
+      } else {
+        ungroupedCodes.push(code);
+      }
+    });
+
+    return { groupedCodes, ungroupedCodes };
+  };
+
+  //Editor management
+  const getEditor = (nodeId: string) => {
+    return editors.get(nodeId);
+  };
+
+  const setEditor = (nodeId: string, editor: Editor | undefined) => {
+    setEditors((prev) => {
+      const newMap = new Map(prev);
+      if (editor) {
+        newMap.set(nodeId, editor);
+      } else {
+        newMap.delete(nodeId);
+      }
+      return newMap;
+    });
+  };
+
+  const getEditors = () => {
+    return editors;
+  };
+
+  const scrollToNode = (nodeId: string) => {
+    const node = nodes.find((n) => n.id === nodeId);
+    if (!node) return;
+
+    // Calculate the center of the node
+    const nodeCenterX = node.x + node.width / 2;
+    const nodeCenterY = node.y + node.height / 2;
+
+    // Calculate the viewport center
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Calculate the new pan offset to center the node
+    const newPanOffsetX = viewportWidth / 2 - nodeCenterX * viewport.scale;
+    const newPanOffsetY = viewportHeight / 2 - nodeCenterY * viewport.scale;
+
+    updateViewport({
+      panOffsetX: newPanOffsetX,
+      panOffsetY: newPanOffsetY,
+      selectedNodeId: nodeId,
+      lastSelectedNodeId: nodeId,
+    });
+  };
+
+  const scrollToCodeSelection = (codeSelection: CodeSelection) => {
+    const { nodeId, from } = codeSelection;
+    scrollToNode(nodeId);
+    setViewport((prev) => ({
+      ...prev,
+      expandedNodeId: nodeId,
+    }));
+    const editor = getEditor(nodeId);
+    if (!editor) return;
+    console.log(from);
+    editor.chain().focus(from, { scrollIntoView: true }).run();
   };
 
   // Initialize the canvas
@@ -559,10 +754,20 @@ export function useCanvas() {
       addFileNode,
       deleteNode,
       updateNode,
+      scrollToNode,
+      scrollToCodeSelection,
       updateViewport,
       addCode,
       updateCode,
       deleteCode,
+      addCodeGroup,
+      updateCodeGroup,
+      deleteCodeGroup,
+      getCodeSelections,
+      getCodesByGroup,
+      getEditor,
+      setEditor,
+      getEditors,
     },
     dragHandlers: {
       startNodeDrag,

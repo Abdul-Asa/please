@@ -1,4 +1,6 @@
+import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
+import type { Editor } from "@tiptap/react";
 import type { FileContent, Node, Viewport, Code, CodeGroup } from "./types";
 import { defaultViewport } from "./constants";
 import Dexie from "dexie";
@@ -10,6 +12,7 @@ export const viewportAtom = atomWithStorage<Viewport>(
 );
 export const codesAtom = atomWithStorage<Code[]>("codes", []);
 export const codeGroupsAtom = atomWithStorage<CodeGroup[]>("codeGroups", []);
+export const editorsAtom = atom<Map<string, Editor>>(new Map());
 
 // IndexedDB store
 export class CanvasDatabase extends Dexie {

@@ -82,7 +82,6 @@ export function FileNodeContent({ node }: { node: FileNode }) {
         content={fileContent.content as string}
         onChange={handleContentChange}
         nodeId={node.id}
-        viewport={canvas.viewport}
       />
     );
   }

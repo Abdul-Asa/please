@@ -26,7 +26,8 @@ import {
   ThemeMarkBubble,
 } from "./toolbar";
 import { motion } from "motion/react";
-import { Viewport } from "../types";
+import { useCanvas } from "../useCanvas";
+
 const extensions = [
   StarterKit.configure({
     orderedList: {
@@ -72,18 +73,12 @@ interface EditorProps {
   content?: string;
   onChange?: (content: string) => void;
   className?: string;
-  isExpanded?: boolean;
   nodeId: string;
-  viewport: Viewport;
 }
 
-const Editor = ({
-  content,
-  onChange,
-  className,
-  nodeId,
-  viewport,
-}: EditorProps) => {
+const Editor = ({ content, onChange, className, nodeId }: EditorProps) => {
+  const { canvas, controls } = useCanvas();
+  const { viewport } = canvas;
   const isExpanded = viewport.expandedNodeId === nodeId;
   const [isEditable, setIsEditable] = useState(isExpanded || false);
 
@@ -92,9 +87,19 @@ const Editor = ({
     content,
     editable: isEditable,
     immediatelyRender: false,
+    editorProps: {
+      scrollThreshold: 180,
+      scrollMargin: 180,
+    },
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML());
       setIsEditable(editor.isEditable);
+    },
+    onCreate: ({ editor }) => {
+      controls.setEditor(nodeId, editor);
+    },
+    onDestroy: () => {
+      controls.setEditor(nodeId, undefined);
     },
   });
 
@@ -103,7 +108,7 @@ const Editor = ({
       editor.setEditable(isExpanded || false);
     }
     if (isExpanded) {
-      editor?.chain().focus("end").unsetThemeMark().run();
+      editor?.chain().focus().run();
     }
   }, [isExpanded, editor]);
 

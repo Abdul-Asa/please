@@ -5,24 +5,63 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Bookmark, Info, Trash2 } from "lucide-react";
+import {
+  Bookmark,
+  ChevronDown,
+  ChevronRight,
+  Info,
+  Trash2,
+  Plus,
+} from "lucide-react";
 import { useCanvas } from "../useCanvas";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Sortable,
+  SortableItem,
+  SortableDragHandle,
+} from "@/components/ui/sortable";
+import type { Code, CodeGroup, CodeSelection } from "../types";
 
 export function CodeManager() {
   const { canvas, controls } = useCanvas();
-  const { codes } = canvas;
-  const { deleteCode } = controls;
+  const { codes, codeGroups } = canvas;
+  const {
+    deleteCode,
+    addCodeGroup,
+    updateCode,
+    getCodeSelections,
+    scrollToCodeSelection,
+    getCodesByGroup,
+  } = controls;
   const [open, setOpen] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+  const { groupedCodes, ungroupedCodes } = getCodesByGroup();
+
+  const handleCreateGroup = () => {
+    if (newGroupName.trim()) {
+      addCodeGroup({ name: newGroupName });
+      setNewGroupName("");
+      setIsCreateGroupOpen(false);
+    }
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -39,55 +78,61 @@ export function CodeManager() {
       <SheetContent side="right" className="w-[400px]">
         <SheetHeader>
           <SheetTitle>Code Manager</SheetTitle>
+          <SheetDescription>
+            Manage your codes and their associated theme marks.
+          </SheetDescription>
         </SheetHeader>
-        <div className="mt-4 space-y-2">
-          {codes.map((code) => (
-            <div
-              key={code.id}
-              className="flex items-center justify-between p-2"
+        <div className="mt-4 space-y-4">
+          <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
+            <Dialog
+              open={isCreateGroupOpen}
+              onOpenChange={setIsCreateGroupOpen}
             >
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: code.color }}
-                />
-                <span className="truncate">{code.name}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      tooltip="Code Info"
-                    >
-                      <Info size={16} />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80">
-                    <div className="space-y-2">
-                      <div>
-                        <h4 className="font-medium">Comments</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {code.comment || "No comment"}
-                        </p>
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 hover:text-destructive"
-                  onClick={() => deleteCode(code.id)}
-                  tooltip="Delete Code"
-                >
-                  <Trash2 size={16} />
+              <DialogTrigger asChild>
+                <Button className="w-full" variant="outline">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create New Group
                 </Button>
-              </div>
-            </div>
-          ))}
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New Code Group</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <Input
+                    placeholder="Group name"
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value)}
+                  />
+                  <Button className="w-full" onClick={handleCreateGroup}>
+                    Create Group
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+            {codes.map((code) => {
+              const marks = getCodeSelections(code.id);
+              return (
+                <div key={code.id}>
+                  <p>{code.name}</p>
+                  <p>
+                    {marks.map((mark) => (
+                      <span
+                        key={`${mark.from}-${mark.to}`}
+                        onClick={() => {
+                          scrollToCodeSelection(mark);
+                          setOpen(false);
+                        }}
+                        className="underline cursor-pointer"
+                      >
+                        {mark.text}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </SheetContent>
     </Sheet>

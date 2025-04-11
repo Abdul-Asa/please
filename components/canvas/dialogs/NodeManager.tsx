@@ -5,6 +5,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -16,35 +17,8 @@ import { useState } from "react";
 export function NodeManager() {
   const { canvas, controls } = useCanvas();
   const { nodes, viewport } = canvas;
-  const { updateViewport } = controls;
+  const { scrollToNode } = controls;
   const [open, setOpen] = useState(false);
-
-  const scrollToNode = (nodeId: string) => {
-    const node = nodes.find((n) => n.id === nodeId);
-    if (!node) return;
-
-    // Calculate the center of the node
-    const nodeCenterX = node.x + node.width / 2;
-    const nodeCenterY = node.y + node.height / 2;
-
-    // Calculate the viewport center
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    // Calculate the new pan offset to center the node
-    const newPanOffsetX = viewportWidth / 2 - nodeCenterX * viewport.scale;
-    const newPanOffsetY = viewportHeight / 2 - nodeCenterY * viewport.scale;
-
-    updateViewport({
-      panOffsetX: newPanOffsetX,
-      panOffsetY: newPanOffsetY,
-      selectedNodeId: nodeId,
-      lastSelectedNodeId: nodeId,
-    });
-
-    // Close the sheet
-    setOpen(false);
-  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -61,13 +35,19 @@ export function NodeManager() {
       <SheetContent side="right" className="w-[400px]">
         <SheetHeader>
           <SheetTitle>Node Manager</SheetTitle>
+          <SheetDescription>
+            Manage your nodes and their associated theme marks.
+          </SheetDescription>
         </SheetHeader>
         <div className="mt-4 space-y-2">
           {nodes.map((node) => (
             <Button
               variant={"outline"}
               key={node.id}
-              onClick={() => scrollToNode(node.id)}
+              onClick={() => {
+                scrollToNode(node.id);
+                setOpen(false);
+              }}
               className={cn(
                 "w-full flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors",
                 viewport.selectedNodeId === node.id && "bg-accent"
