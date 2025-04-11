@@ -8,7 +8,6 @@ import {
   Box,
   Search,
   Keyboard,
-  Bug,
 } from "lucide-react";
 import { useCanvas } from "../useCanvas";
 import { cn } from "@/lib/utils";
@@ -16,6 +15,7 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import { motion } from "motion/react";
 import { NodeManager } from "../dialogs/NodeManager";
 import { CodeManager } from "../dialogs/CodeManager";
+import { DebugDialog } from "../dialogs/DebugDialog";
 
 export function CanvasControls() {
   const { controls, canvas } = useCanvas();
@@ -120,15 +120,7 @@ export function CanvasControls() {
         >
           <Keyboard size={18} />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          tooltip="Debug"
-          tooltipSide="bottom"
-          className="hidden lg:flex"
-        >
-          <Bug size={18} />
-        </Button>
+        <DebugDialog />
       </div>
     </motion.div>
   );

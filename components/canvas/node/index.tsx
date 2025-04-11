@@ -81,7 +81,7 @@ function CanvasNode({ node }: { node: Node }) {
     <motion.div
       draggable={false}
       className={cn(
-        "absolute node group rounded-md border-2 border-primary-light bg-background flex flex-col",
+        "absolute node group rounded-md border-2 border-border bg-background  dark:bg-[#1e0516] flex flex-col",
         !isPanMode && "hover:shadow-sm",
         isSelected && "border-ring"
       )}
@@ -115,7 +115,7 @@ function CanvasNode({ node }: { node: Node }) {
     >
       <div
         className={cn(
-          "flex items-center justify-between p-0.5 border-b shrink-0",
+          "flex items-center justify-between p-0.5 border-b shrink-0 border-border",
           !isPanMode && "cursor-grab active:cursor-grabbing"
         )}
         onMouseDown={(e) => !isPanMode && startNodeDrag(e, node.id)}
