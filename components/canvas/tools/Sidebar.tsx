@@ -14,7 +14,7 @@ export function CanvasSidebar() {
 
   return (
     <motion.div
-      className="absolute left-4 top-1/2 flex flex-col items-center gap-4 p-2 backdrop-blur-sm rounded-sm border border-border shadow-sm z-[40]"
+      className="absolute left-4 top-1/2 flex flex-col items-center gap-4 p-2 bg-background/60 backdrop-blur-sm rounded-sm border border-border shadow-sm z-[40]"
       initial={{ x: isExpanded ? -100 : 0, y: "-50%" }}
       animate={{ x: isExpanded ? -100 : 0, y: "-50%" }}
       exit={{ x: -100, y: "-50%" }}

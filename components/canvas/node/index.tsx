@@ -88,13 +88,17 @@ function CanvasNode({ node }: { node: Node }) {
       layout
       layoutId={`${node.id}-container`}
       style={{
-        minWidth: node.width,
+        minWidth: isExpanded ? "0px" : node.width,
         minHeight: node.height,
         zIndex: isExpanded ? 100 : isLastSelected ? 10 : "auto",
         maxWidth: isExpanded ? "none" : NODE_CONSTANTS.MAX_NODE_WIDTH,
         maxHeight: isExpanded ? "none" : NODE_CONSTANTS.MAX_NODE_HEIGHT,
-        height: isExpanded ? "calc(100vh - 2rem)" : "max-content",
-        width: isExpanded ? "calc(100vw - 2rem)" : "max-content",
+        height: isExpanded
+          ? "calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)"
+          : "max-content",
+        width: isExpanded
+          ? "calc(100dvw - env(safe-area-inset-left) - env(safe-area-inset-right) - 2rem)"
+          : "max-content",
         left: isExpanded ? -viewport.panOffsetX / viewport.scale + 16 : node.x,
         top: isExpanded ? -viewport.panOffsetY / viewport.scale + 16 : node.y,
       }}

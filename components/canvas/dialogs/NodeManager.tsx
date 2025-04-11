@@ -32,7 +32,7 @@ export function NodeManager() {
           <FolderOpen size={18} />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[400px]">
+      <SheetContent side="right" className="sm:w-[400px] w-[calc(100vw-2rem)]">
         <SheetHeader>
           <SheetTitle>Node Manager</SheetTitle>
           <SheetDescription>

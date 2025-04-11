@@ -1,6 +1,15 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus, RotateCcw, Move, Box } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  RotateCcw,
+  Move,
+  Box,
+  Search,
+  Keyboard,
+  Bug,
+} from "lucide-react";
 import { useCanvas } from "../useCanvas";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/ui/mode-toggle";
@@ -26,7 +35,7 @@ export function CanvasControls() {
         damping: 30,
       }}
     >
-      <div className="absolute bottom-4 lg:bottom-auto lg:top-4 left-4 flex items-center gap-1 rounded-md bg-background/90 border border-border px-2 py-1.5 backdrop-blur-sm">
+      <div className="absolute bottom-4 lg:bottom-auto lg:top-4 left-4 flex items-center gap-1 rounded-md bg-background/60 border border-border px-2 py-1.5 backdrop-blur-sm">
         <Button
           variant="ghost"
           size="icon"
@@ -81,9 +90,17 @@ export function CanvasControls() {
           <RotateCcw size={18} />
         </Button>
       </div>
-      <div className="absolute top-4 right-4 flex items-center gap-1 rounded-md bg-background/90 border border-border px-2 py-1.5 backdrop-blur-sm">
+      <div className="absolute top-4 right-4 flex items-center gap-1 rounded-md bg-background/60 border border-border px-2 py-1.5 backdrop-blur-sm">
         <NodeManager />
         <CodeManager />
+        <Button
+          variant="ghost"
+          size="icon"
+          tooltip="Search"
+          tooltipSide="bottom"
+        >
+          <Search size={18} />
+        </Button>
         <Button
           variant="ghost"
           size="icon"
@@ -94,6 +111,24 @@ export function CanvasControls() {
         </Button>
         <div className="h-6 w-px bg-border mx-1"></div>
         <ModeToggle />
+        <Button
+          variant="ghost"
+          size="icon"
+          tooltip="Shortcuts"
+          tooltipSide="bottom"
+          className="hidden lg:flex"
+        >
+          <Keyboard size={18} />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          tooltip="Debug"
+          tooltipSide="bottom"
+          className="hidden lg:flex"
+        >
+          <Bug size={18} />
+        </Button>
       </div>
     </motion.div>
   );

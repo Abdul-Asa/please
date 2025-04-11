@@ -1,18 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Modal } from "@/components/ui/modal";
 import { FileIcon } from "lucide-react";
 import { useCanvas } from "../useCanvas";
 import { FileType } from "../types";
 import { useState } from "react";
+
 export function AddFileDialog() {
   const { controls } = useCanvas();
   const [open, setOpen] = useState(false);
@@ -37,8 +31,10 @@ export function AddFileDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Modal
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
         <Button
           variant="outline"
           size="icon"
@@ -48,39 +44,34 @@ export function AddFileDialog() {
         >
           <FileIcon size={20} />
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add File</DialogTitle>
-          <DialogDescription>
-            Upload a file to add it to your canvas.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex items-center justify-center w-full">
-          <label
-            htmlFor="file-upload"
-            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent/50"
-          >
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              <FileIcon className="w-8 h-8 mb-4 text-muted-foreground" />
-              <p className="mb-2 text-sm text-muted-foreground">
-                <span className="font-semibold">Click to upload</span> or drag
-                and drop
-              </p>
-              <p className="text-xs text-muted-foreground">
-                .txt, .md, .docx, and image files supported
-              </p>
-            </div>
-            <input
-              id="file-upload"
-              type="file"
-              className="hidden"
-              onChange={handleFileUpload}
-              accept=".txt,.md,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
-            />
-          </label>
-        </div>
-      </DialogContent>
-    </Dialog>
+      }
+      title="Add File"
+      description="Upload a file to add it to your canvas."
+    >
+      <div className="flex items-center justify-center w-full">
+        <label
+          htmlFor="file-upload"
+          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent/50"
+        >
+          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+            <FileIcon className="w-8 h-8 mb-4 text-muted-foreground" />
+            <p className="mb-2 text-sm text-muted-foreground">
+              <span className="font-semibold">Click to upload</span> or drag and
+              drop
+            </p>
+            <p className="text-xs text-muted-foreground">
+              .txt, .md, .docx, and image files supported
+            </p>
+          </div>
+          <input
+            id="file-upload"
+            type="file"
+            className="hidden"
+            onChange={handleFileUpload}
+            accept=".txt,.md,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+          />
+        </label>
+      </div>
+    </Modal>
   );
 }

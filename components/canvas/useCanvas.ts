@@ -45,7 +45,6 @@ export function useCanvas() {
   const [codes, setCodes] = useAtom(codesAtom);
   const [codeGroups, setCodeGroups] = useAtom(codeGroupsAtom);
   const [editors, setEditors] = useAtom(editorsAtom);
-  const [codeMarks, setCodeMarks] = useState();
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Zoom functions
@@ -53,14 +52,32 @@ export function useCanvas() {
     setViewport((prev) => ({
       ...prev,
       scale: Math.min(prev.scale * ZOOM_BUTTON_FACTOR, MAX_SCALE),
+      isScrolling: true,
     }));
+
+    // Set a timeout to set isScrolling back to false
+    setTimeout(() => {
+      setViewport((prev) => ({
+        ...prev,
+        isScrolling: false,
+      }));
+    }, 150); // 150ms delay
   };
 
   const zoomOut = () => {
     setViewport((prev) => ({
       ...prev,
       scale: Math.max(prev.scale / ZOOM_BUTTON_FACTOR, MIN_SCALE),
+      isScrolling: true,
     }));
+
+    // Set a timeout to set isScrolling back to false
+    setTimeout(() => {
+      setViewport((prev) => ({
+        ...prev,
+        isScrolling: false,
+      }));
+    }, 150); // 150ms delay
   };
 
   const resetView = () => {
@@ -245,30 +262,89 @@ export function useCanvas() {
     if (e.touches.length !== 1) return; // Only handle single touch
 
     const touch = e.touches[0];
-    setViewport((prev) => ({
-      ...prev,
-      isPanning: true,
-      panStartX: touch.clientX - prev.panOffsetX,
-      panStartY: touch.clientY - prev.panOffsetY,
-    }));
+    if (viewport.panMode) {
+      setViewport((prev) => ({
+        ...prev,
+        isPanning: true,
+        panStartX: touch.clientX - prev.panOffsetX,
+        panStartY: touch.clientY - prev.panOffsetY,
+      }));
+    } else {
+      // Find the node under the touch point
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (!target) return;
+
+      const nodeElement = target.closest("[data-node-id]");
+      if (!nodeElement) return;
+
+      const nodeId = nodeElement.getAttribute("data-node-id");
+      if (!nodeId) return;
+
+      const node = nodes.find((n) => n.id === nodeId);
+      if (!node) return;
+
+      setViewport((prev) => ({
+        ...prev,
+        isDragging: true,
+        selectedNodeId: nodeId,
+        lastSelectedNodeId: nodeId,
+        dragState: {
+          startX: touch.clientX,
+          startY: touch.clientY,
+          initialNodeX: node.x,
+          initialNodeY: node.y,
+        },
+      }));
+    }
   };
 
   const handleTouchMove = (e: TouchEvent) => {
     e.preventDefault();
-    if (!viewport.isPanning || e.touches.length !== 1) return;
+    if (e.touches.length !== 1) return;
 
     const touch = e.touches[0];
-    setViewport((prev) => ({
-      ...prev,
-      panOffsetX: touch.clientX - prev.panStartX,
-      panOffsetY: touch.clientY - prev.panStartY,
-    }));
+    if (viewport.panMode) {
+      setViewport((prev) => ({
+        ...prev,
+        panOffsetX: touch.clientX - prev.panStartX,
+        panOffsetY: touch.clientY - prev.panStartY,
+      }));
+    } else if (
+      viewport.isDragging &&
+      viewport.dragState &&
+      viewport.selectedNodeId
+    ) {
+      const deltaX =
+        (touch.clientX - viewport.dragState.startX) / viewport.scale;
+      const deltaY =
+        (touch.clientY - viewport.dragState.startY) / viewport.scale;
+
+      setNodes((prevNodes) =>
+        prevNodes.map((node) => {
+          if (node.id !== viewport.selectedNodeId) return node;
+
+          return {
+            ...node,
+            x: viewport.dragState.initialNodeX + deltaX,
+            y: viewport.dragState.initialNodeY + deltaY,
+          };
+        })
+      );
+    }
   };
 
   const handleTouchEnd = () => {
     setViewport((prev) => ({
       ...prev,
       isPanning: false,
+      isDragging: false,
+      selectedNodeId: "",
+      dragState: {
+        startX: 0,
+        startY: 0,
+        initialNodeX: 0,
+        initialNodeY: 0,
+      },
     }));
   };
 
@@ -688,22 +764,18 @@ export function useCanvas() {
     canvas.addEventListener("pointerdown", handleMouseDown);
     window.addEventListener("pointermove", handleMouseMove);
     window.addEventListener("pointerup", handleMouseUp);
-    if ("ontouchstart" in window) {
-      canvas.addEventListener("touchstart", handleTouchStart);
-      canvas.addEventListener("touchmove", handleTouchMove);
-      window.addEventListener("touchend", handleTouchEnd);
-    }
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       canvas.removeEventListener("wheel", handleWheel);
       canvas.removeEventListener("pointerdown", handleMouseDown);
       window.removeEventListener("pointermove", handleMouseMove);
       window.removeEventListener("pointerup", handleMouseUp);
-      if ("ontouchstart" in window) {
-        canvas.removeEventListener("touchstart", handleTouchStart);
-        canvas.removeEventListener("touchmove", handleTouchMove);
-        window.removeEventListener("touchend", handleTouchEnd);
-      }
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [
     handleWheel,
@@ -724,10 +796,10 @@ export function useCanvas() {
       handleNodeDrag(e);
     };
 
-    window.addEventListener("mousemove", handleGlobalNodeDrag);
+    window.addEventListener("pointermove", handleGlobalNodeDrag);
 
     return () => {
-      window.removeEventListener("mousemove", handleGlobalNodeDrag);
+      window.removeEventListener("pointermove", handleGlobalNodeDrag);
     };
   }, [viewport.isDragging, viewport.selectedNodeId, handleNodeDrag]);
 

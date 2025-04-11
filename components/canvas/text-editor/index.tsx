@@ -125,9 +125,9 @@ const Editor = ({ content, onChange, className, nodeId }: EditorProps) => {
       {editor && <CodeGroupMenu editor={editor} nodeId={nodeId} />}
       {editor && <ThemeMarkBubble editor={editor} />}
       {isEditable && (
-        <div className="flex w-full items-center overflow-hidden py-2 px-2 justify-between border-b sticky top-0 left-0 bg-background z-20">
+        <div className="flex w-full items-center overflow-x-auto overflow-y-hidden py-2 px-2 justify-start border-b sticky top-0 left-0 bg-background z-20">
           <ToolbarProvider editor={editor}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-max">
               <UndoToolbar />
               <RedoToolbar />
               <Separator orientation="vertical" className="h-7" />
