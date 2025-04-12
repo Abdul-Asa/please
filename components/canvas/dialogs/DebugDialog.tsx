@@ -25,11 +25,13 @@ export function DebugDialog() {
       </Button>
 
       <AnimatePresence>
-        {isOpen && canvas.viewport.expandedNodeId === "" && (
+        {isOpen && (
           <motion.div
+            drag
             initial={{ x: 100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 100, opacity: 0 }}
+            exit={{ opacity: 0 }}
+            dragMomentum={false}
             transition={{
               type: "spring",
               stiffness: 300,
@@ -37,7 +39,7 @@ export function DebugDialog() {
             }}
             className="absolute top-20 right-4 w-80 max-h-[calc(100vh-6rem)] bg-background/95 border border-border rounded-lg shadow-lg overflow-hidden backdrop-blur-sm z-50"
           >
-            <div className="p-4 border-b border-border flex items-center">
+            <div className="p-4 border-b border-border flex items-center cursor-grab">
               <h3 className="font-semibold">Debug Panel</h3>
               <Button
                 variant="outline"
