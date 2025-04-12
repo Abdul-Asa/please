@@ -82,7 +82,7 @@ export function AddCodeDialog() {
               placeholder="A new code"
               required
             />
-            <Popover>
+            <Popover modal={open}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"

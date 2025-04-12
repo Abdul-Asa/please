@@ -149,6 +149,7 @@ h3.tiptap-heading + h2.tiptap-heading {
   transition: background-size 0.3s ease;
   padding-bottom: 1px;
   position: relative;
+  color: inherit;
   cursor: pointer;
 }
 

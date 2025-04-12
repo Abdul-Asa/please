@@ -82,7 +82,7 @@ export const CodeGroupMenu = ({
           //&& !editor.isFocused
         );
       }}
-      className="bg-white shadow-md border rounded-md p-2 flex flex-col gap-1 items-start min-w-[200px]"
+      className="bg-background shadow-md border rounded-md p-2 flex flex-col gap-1 items-start min-w-[200px]"
     >
       {codes.length === 0 && (
         <div className="w-full flex flex-col items-center justify-center gap-2">
@@ -94,7 +94,10 @@ export const CodeGroupMenu = ({
         <Button
           key={code.id}
           variant="ghost"
-          className={cn("w-full justify-start text-left", "hover:bg-gray-100")}
+          className={cn(
+            "w-full justify-start text-left",
+            "hover:bg-accent hover:text-accent-foreground"
+          )}
           onClick={() => handleCodeSelect(code.id)}
         >
           <div

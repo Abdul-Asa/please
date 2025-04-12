@@ -81,7 +81,6 @@ export interface Code {
   color: string;
   comment?: string;
   groupId?: string;
-  order?: number;
 }
 
 export interface CodeGroup {
