@@ -38,11 +38,9 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import type { Code, CodeGroup, CodeSelection } from "../types";
+import type { Code, CodeSelection, CodeGroup } from "../types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DndContext,
   closestCenter,
@@ -52,6 +50,7 @@ import {
   useSensors,
   DragEndEvent,
   DragOverEvent,
+  useDroppable,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -60,20 +59,21 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { cn } from "@/lib/utils";
 
 function SortableCode({
+  isOpen,
   code,
   onDelete,
-  onInfo,
   onToggle,
   isExpanded,
   selections,
   scrollToCodeSelection,
   setOpen,
 }: {
+  isOpen: boolean;
   code: Code;
   onDelete: (id: string) => void;
-  onInfo: (code: Code) => void;
   onToggle: (id: string) => void;
   isExpanded: boolean;
   selections: CodeSelection[];
@@ -101,11 +101,13 @@ function SortableCode({
         ref={setNodeRef}
         style={style}
         className="flex items-center justify-between p-2 rounded-md group bg-white"
-        {...attributes}
-        {...listeners}
       >
         <div className="flex items-center gap-2 flex-1">
-          <div className="cursor-grab opacity-0 group-hover:opacity-100 transition-opacity">
+          <div
+            className="cursor-grab opacity-0 group-hover:opacity-100 transition-opacity"
+            {...attributes}
+            {...listeners}
+          >
             <GripVertical className="h-4 w-4" />
           </div>
           <Button
@@ -131,7 +133,7 @@ function SortableCode({
           </Button>
         </div>
         <div className="flex gap-1">
-          <Popover>
+          <Popover modal={isOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
@@ -190,6 +192,175 @@ function SortableCode({
   );
 }
 
+function GroupHeader({
+  group,
+  isExpanded,
+  onToggle,
+  onDelete,
+  isDeleteOpen,
+  selectedGroupId,
+  setIsDeleteOpen,
+  setSelectedGroupId,
+  deleteOption,
+  setDeleteOption,
+  codeCount,
+}: {
+  group: CodeGroup;
+  isExpanded: boolean;
+  onToggle: (id: string) => void;
+  onDelete: () => void;
+  isDeleteOpen: boolean;
+  selectedGroupId: string | null;
+  setIsDeleteOpen: (open: boolean) => void;
+  setSelectedGroupId: (id: string | null) => void;
+  deleteOption: "move" | "delete";
+  setDeleteOption: (option: "move" | "delete") => void;
+  codeCount: number;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `group-${group.id}`,
+  });
+
+  return (
+    <div className="flex items-center justify-between">
+      <Button
+        ref={setNodeRef}
+        variant="ghost"
+        className={cn("w-full justify-start p-2", isOver && "bg-accent/50")}
+        onClick={() => onToggle(group.id)}
+      >
+        {isExpanded ? (
+          <ChevronDown className="w-4 h-4 mr-2" />
+        ) : (
+          <ChevronRight className="w-4 h-4 mr-2" />
+        )}
+        <span className="font-medium">{group.name}</span>
+        <span className="ml-2 text-xs text-muted-foreground">
+          ({codeCount})
+        </span>
+      </Button>
+      <Dialog
+        open={isDeleteOpen && selectedGroupId === group.id}
+        onOpenChange={(open) => {
+          setIsDeleteOpen(open);
+          if (!open) {
+            setSelectedGroupId(null);
+            setDeleteOption("move");
+          }
+        }}
+      >
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => {
+              setSelectedGroupId(group.id);
+              setIsDeleteOpen(true);
+            }}
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Group</DialogTitle>
+            <DialogDescription>
+              Choose what happens to the codes in this group when you delete it.
+              You can either move them to ungrouped or delete them permanently.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <p>
+              You are about to delete the group "{group.name}".
+              {codeCount
+                ? ` This group contains ${codeCount} code${
+                    codeCount === 1 ? "" : "s"
+                  }.`
+                : ""}
+            </p>
+            <RadioGroup
+              value={deleteOption}
+              onValueChange={(value: string) =>
+                setDeleteOption(value as "move" | "delete")
+              }
+              className="space-y-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="move" id="move" />
+                <Label htmlFor="move">
+                  Delete group and move codes to ungrouped
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="delete" id="delete" />
+                <Label htmlFor="delete" className="text-destructive">
+                  Delete group and all its codes
+                </Label>
+              </div>
+            </RadioGroup>
+            <div className="flex gap-2 pt-4">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setIsDeleteOpen(false);
+                  setSelectedGroupId(null);
+                  setDeleteOption("move");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex-1"
+                onClick={onDelete}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function UngroupedHeader({
+  isExpanded,
+  onToggle,
+  codeCount,
+}: {
+  isExpanded: boolean;
+  onToggle: (id: string) => void;
+  codeCount: number;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: "group-ungrouped",
+  });
+
+  return (
+    <div className="flex items-center justify-between">
+      <Button
+        ref={setNodeRef}
+        variant="ghost"
+        className={cn("w-full justify-start p-2", isOver && "bg-accent/50")}
+        onClick={() => onToggle("ungrouped")}
+      >
+        {isExpanded ? (
+          <ChevronDown className="w-4 h-4 mr-2" />
+        ) : (
+          <ChevronRight className="w-4 h-4 mr-2" />
+        )}
+        <span className="font-medium">Ungrouped</span>
+        <span className="ml-2 text-xs text-muted-foreground">
+          ({codeCount})
+        </span>
+      </Button>
+    </div>
+  );
+}
+
 export function CodeManager() {
   const { canvas, controls } = useCanvas();
   const { codes, codeGroups } = canvas;
@@ -238,8 +409,25 @@ export function CodeManager() {
     if (!over) return;
 
     const activeGroupId = findCodeGroup(active.id as string);
-    const overGroupId = findCodeGroup(over.id as string);
+    const overId = over.id as string;
 
+    // Check if we're dropping onto a group header
+    if (overId.startsWith("group-")) {
+      const targetGroupId = overId.replace("group-", "");
+      if (activeGroupId !== targetGroupId) {
+        // Move code to new group
+        const code = codes.find((c) => c.id === active.id);
+        if (code) {
+          updateCode(code.id, {
+            groupId: targetGroupId === "ungrouped" ? undefined : targetGroupId,
+          });
+        }
+      }
+      return;
+    }
+
+    // Handle dropping onto other codes
+    const overGroupId = findCodeGroup(overId);
     if (!activeGroupId || !overGroupId) return;
 
     if (activeGroupId !== overGroupId) {
@@ -399,23 +587,11 @@ export function CodeManager() {
           <div className="space-y-4">
             {/* Ungrouped Codes */}
             <div>
-              <div className="flex items-center justify-between">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start p-2"
-                  onClick={() => toggleGroup("ungrouped")}
-                >
-                  {expandedGroups.has("ungrouped") ? (
-                    <ChevronDown className="w-4 h-4 mr-2" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4 mr-2" />
-                  )}
-                  <span className="font-medium">Ungrouped</span>
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    ({ungroupedCodes.length})
-                  </span>
-                </Button>
-              </div>
+              <UngroupedHeader
+                isExpanded={expandedGroups.has("ungrouped")}
+                onToggle={toggleGroup}
+                codeCount={ungroupedCodes.length}
+              />
               {expandedGroups.has("ungrouped") && (
                 <div className="pl-6">
                   <SortableContext
@@ -423,15 +599,17 @@ export function CodeManager() {
                     strategy={verticalListSortingStrategy}
                   >
                     <div className="space-y-1">
+                      {ungroupedCodes.length === 0 && (
+                        <div className="text-center text-sm text-muted-foreground">
+                          No codes in ungrouped
+                        </div>
+                      )}
                       {ungroupedCodes.map((code) => (
                         <SortableCode
                           key={code.id}
                           code={code}
                           onDelete={deleteCode}
-                          onInfo={(code) => {
-                            // Show code info in a popover
-                            console.log("Show info for:", code);
-                          }}
+                          isOpen={open}
                           onToggle={toggleCode}
                           isExpanded={expandedCodes.has(code.id)}
                           selections={getCodeSelections(code.id)}
@@ -448,112 +626,19 @@ export function CodeManager() {
             {/* Grouped Codes */}
             {codeGroups.map((group) => (
               <div key={group.id}>
-                <div className="flex items-center justify-between">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start p-2"
-                    onClick={() => toggleGroup(group.id)}
-                  >
-                    {expandedGroups.has(group.id) ? (
-                      <ChevronDown className="w-4 h-4 mr-2" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 mr-2" />
-                    )}
-                    <span className="font-medium">{group.name}</span>
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      ({groupedCodes.get(group.id)?.length || 0})
-                    </span>
-                  </Button>
-                  <Dialog
-                    open={isDeleteGroupOpen && selectedGroupId === group.id}
-                    onOpenChange={(open) => {
-                      setIsDeleteGroupOpen(open);
-                      if (!open) {
-                        setSelectedGroupId(null);
-                        setDeleteOption("move");
-                      }
-                    }}
-                  >
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => {
-                          setSelectedGroupId(group.id);
-                          setIsDeleteGroupOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Delete Group</DialogTitle>
-                        <DialogDescription>
-                          Choose what happens to the codes in this group when
-                          you delete it. You can either move them to ungrouped
-                          or delete them permanently.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-6 py-4">
-                        <p>
-                          You are about to delete the group "{group.name}".
-                          {groupedCodes.get(group.id)?.length
-                            ? ` This group contains ${groupedCodes.get(group.id)?.length} code${
-                                groupedCodes.get(group.id)?.length === 1
-                                  ? ""
-                                  : "s"
-                              }.`
-                            : ""}
-                        </p>
-                        <RadioGroup
-                          value={deleteOption}
-                          onValueChange={(value: string) =>
-                            setDeleteOption(value as "move" | "delete")
-                          }
-                          className="space-y-4"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="move" id="move" />
-                            <Label htmlFor="move">
-                              Delete group and move codes to ungrouped
-                            </Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="delete" id="delete" />
-                            <Label
-                              htmlFor="delete"
-                              className="text-destructive"
-                            >
-                              Delete group and all its codes
-                            </Label>
-                          </div>
-                        </RadioGroup>
-                        <div className="flex gap-2 pt-4">
-                          <Button
-                            variant="outline"
-                            className="flex-1"
-                            onClick={() => {
-                              setIsDeleteGroupOpen(false);
-                              setSelectedGroupId(null);
-                              setDeleteOption("move");
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            className="flex-1"
-                            onClick={handleDeleteGroup}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                <GroupHeader
+                  group={group}
+                  isExpanded={expandedGroups.has(group.id)}
+                  onToggle={toggleGroup}
+                  onDelete={handleDeleteGroup}
+                  isDeleteOpen={isDeleteGroupOpen}
+                  selectedGroupId={selectedGroupId}
+                  setIsDeleteOpen={setIsDeleteGroupOpen}
+                  setSelectedGroupId={setSelectedGroupId}
+                  deleteOption={deleteOption}
+                  setDeleteOption={setDeleteOption}
+                  codeCount={groupedCodes.get(group.id)?.length || 0}
+                />
                 {expandedGroups.has(group.id) && (
                   <div className="pl-6">
                     <SortableContext
@@ -563,15 +648,17 @@ export function CodeManager() {
                       strategy={verticalListSortingStrategy}
                     >
                       <div className="space-y-1">
+                        {groupedCodes.get(group.id)?.length === 0 && (
+                          <div className="text-center text-sm text-muted-foreground">
+                            No codes in {group.name}
+                          </div>
+                        )}
                         {(groupedCodes.get(group.id) || []).map((code) => (
                           <SortableCode
                             key={code.id}
                             code={code}
                             onDelete={deleteCode}
-                            onInfo={(code) => {
-                              // Show code info in a popover
-                              console.log("Show info for:", code);
-                            }}
+                            isOpen={open}
                             onToggle={toggleCode}
                             isExpanded={expandedCodes.has(code.id)}
                             selections={getCodeSelections(code.id)}
