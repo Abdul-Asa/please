@@ -670,6 +670,12 @@ export function useCanvas() {
       }
     });
 
+    // Sort codes by order within each group
+    groupedCodes.forEach((groupCodes) => {
+      groupCodes.sort((a, b) => (a.order || 0) - (b.order || 0));
+    });
+    ungroupedCodes.sort((a, b) => (a.order || 0) - (b.order || 0));
+
     return { groupedCodes, ungroupedCodes };
   };
 

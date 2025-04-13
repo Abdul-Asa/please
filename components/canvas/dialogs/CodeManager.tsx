@@ -446,7 +446,26 @@ export function CodeManager() {
     if (!over) return;
 
     const activeGroupId = findCodeGroup(active.id as string);
-    if (!activeGroupId) return;
+    const overId = over.id as string;
+
+    // Check if we're dropping onto a group header
+    if (overId.startsWith("group-")) {
+      const targetGroupId = overId.replace("group-", "");
+      if (activeGroupId !== targetGroupId) {
+        // Move code to new group
+        const code = codes.find((c) => c.id === active.id);
+        if (code) {
+          updateCode(code.id, {
+            groupId: targetGroupId === "ungrouped" ? undefined : targetGroupId,
+          });
+        }
+      }
+      return;
+    }
+
+    // Handle reordering within the same group
+    const overGroupId = findCodeGroup(overId);
+    if (!activeGroupId || !overGroupId || activeGroupId !== overGroupId) return;
 
     const activeCodes =
       activeGroupId === "ungrouped"
