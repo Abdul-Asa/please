@@ -127,10 +127,7 @@ export function useCanvas() {
   };
 
   const resetToDefaultView = () => {
-    setViewport((prev) => ({
-      ...prev,
-      scale: 1,
-    }));
+    setViewport(defaultViewport);
   };
 
   // Handle wheel zoom

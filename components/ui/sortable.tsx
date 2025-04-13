@@ -332,8 +332,10 @@ const SortableDragHandle = React.forwardRef<
   return (
     <Button
       ref={composeRefs(ref)}
+      variant="ghost"
       data-state={isDragging ? "dragging" : undefined}
       className={cn(
+        "hover:bg-transparent",
         disabled
           ? "cursor-not-allowed opacity-50"
           : "cursor-grab data-[state=dragging]:cursor-grabbing",
