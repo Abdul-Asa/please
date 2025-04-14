@@ -16,7 +16,7 @@ import { motion } from "motion/react";
 import { NodeManager } from "../dialogs/NodeManager";
 import { CodeManager } from "../dialogs/CodeManager";
 import { DebugDialog } from "../dialogs/DebugDialog";
-import VRCanvas from "../3d";
+import { VRCanvas } from "../3d";
 
 export function CanvasControls() {
   const { controls, canvas } = useCanvas();
@@ -97,15 +97,6 @@ export function CanvasControls() {
         <VRCanvas />
         <div className="h-6 w-px bg-border mx-1"></div>
         <ModeToggle />
-        <Button
-          variant="ghost"
-          size="icon"
-          tooltip="Shortcuts"
-          tooltipSide="bottom"
-          className="hidden lg:flex"
-        >
-          <Keyboard size={18} />
-        </Button>
         <DebugDialog />
       </div>
     </motion.div>

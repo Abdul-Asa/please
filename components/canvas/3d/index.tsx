@@ -1,7 +1,11 @@
-import { VRModal } from "./VRModal";
+import { Button } from "@/components/ui/button";
+import { useCanvas } from "../useCanvas";
+export function VRCanvas() {
+  const {
+    controls: { updateViewport },
+  } = useCanvas();
 
-const VRCanvas = () => {
-  return <VRModal />;
-};
-
-export default VRCanvas;
+  return (
+    <Button onClick={() => updateViewport({ is3D: true })}>Enter VR</Button>
+  );
+}

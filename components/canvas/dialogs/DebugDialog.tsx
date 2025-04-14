@@ -138,7 +138,6 @@ export function DebugDialog() {
         size="icon"
         tooltip="Debug"
         tooltipSide="bottom"
-        className="hidden lg:flex"
         onClick={() => setIsOpen(!isOpen)}
       >
         <Bug size={18} />

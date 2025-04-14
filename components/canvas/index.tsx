@@ -6,6 +6,7 @@ import { CanvasContextType, CanvasData } from "./types";
 import { createContext, ReactNode } from "react";
 import { CanvasSidebar } from "./tools/Sidebar";
 import { CanvasControls } from "./tools/Controls";
+import { ThreeDCanvas } from "./3d/example";
 
 // Context for the canvas
 export const CanvasContext = createContext<CanvasContextType | null>(null);
@@ -35,7 +36,9 @@ function CanvasContent() {
   const { canvas, canvasRef, loading } = useCanvas();
   const { viewport } = canvas;
 
-  return (
+  return viewport.is3D ? (
+    <ThreeDCanvas />
+  ) : (
     <div
       className="fixed inset-0 h-full w-full overflow-hidden"
       style={
@@ -67,9 +70,6 @@ function CanvasContent() {
         )}
         <CanvasSidebar />
         <CanvasControls />
-        {/* <div className="absolute left-0 bottom-0 p-4 size-[400px] overflow-scroll pointer-events-none">
-          <pre>{JSON.stringify(canvas.nodes, null, 2)}</pre>
-        </div> */}
       </div>
     </div>
   );

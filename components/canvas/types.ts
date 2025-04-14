@@ -28,6 +28,7 @@ export interface FileNode extends BaseNode {
 export type Node = TextNode | FileNode;
 
 export interface Viewport {
+  is3D: boolean;
   scale: number;
   panOffsetX: number;
   panOffsetY: number;
