@@ -1,14 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import {
-  Minus,
-  Plus,
-  RotateCcw,
-  Move,
-  Box,
-  Keyboard,
-  Search,
-} from "lucide-react";
+import { Minus, Plus, RotateCcw, Move } from "lucide-react";
 import { useCanvas } from "../useCanvas";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/ui/mode-toggle";

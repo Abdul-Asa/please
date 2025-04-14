@@ -6,7 +6,7 @@ import { CanvasContextType, CanvasData } from "./types";
 import { createContext, ReactNode } from "react";
 import { CanvasSidebar } from "./tools/Sidebar";
 import { CanvasControls } from "./tools/Controls";
-import { ThreeDCanvas } from "./3d/example";
+import { VR } from "./3d/VRcanvas";
 
 // Context for the canvas
 export const CanvasContext = createContext<CanvasContextType | null>(null);
@@ -37,7 +37,7 @@ function CanvasContent() {
   const { viewport } = canvas;
 
   return viewport.is3D ? (
-    <ThreeDCanvas />
+    <VR />
   ) : (
     <div
       className="fixed inset-0 h-full w-full overflow-hidden"
