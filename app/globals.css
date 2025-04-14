@@ -142,7 +142,11 @@ h3.tiptap-heading + h2.tiptap-heading {
 
 .theme-mark {
   background-color: transparent;
-  background-image: linear-gradient(to right, var(--theme-gradient));
+  background-image: linear-gradient(
+    to right,
+    var(--theme-gradient),
+    var(--theme-gradient)
+  );
   background-size: 100% 3px;
   background-repeat: no-repeat;
   background-position: 0 100%;

@@ -3,19 +3,12 @@
 import * as React from "react";
 import { useState } from "react";
 import * as XLSX from "xlsx";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Import } from "lucide-react";
 import type { Code, CodeGroup } from "../types";
+import { Modal } from "@/components/ui/modal";
 
 interface ImportDialogProps {
   codes: Code[];
@@ -28,7 +21,7 @@ export function ImportDialog({
   codeGroups,
   onImport,
 }: ImportDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,7 +138,7 @@ export function ImportDialog({
         } else {
           throw new Error("Unsupported file format");
         }
-        setIsOpen(false);
+        setOpen(false);
       } catch (error) {
         setError(
           error instanceof Error
@@ -163,37 +156,39 @@ export function ImportDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon" tooltip="Import">
+    <Modal
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
+        <Button
+          variant="outline"
+          size="icon"
+          tooltip="Import"
+          tooltipSide="right"
+        >
           <Import className="w-4 h-4" />
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Import Codebook</DialogTitle>
-          <DialogDescription>
-            Import a codebook from a previously exported file.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>Select File</Label>
-            <Input type="file" accept=".xml,.xlsx" onChange={handleImport} />
-          </div>
-          {error && <div className="text-sm text-destructive">{error}</div>}
-          <div className="text-sm text-muted-foreground">
-            <p>Supported formats:</p>
-            <ul className="list-disc pl-4 mt-1">
-              <li>REFI-QDA XML (.xml) - Exported from this application</li>
-              <li>Excel (.xlsx) - Exported from this application</li>
-            </ul>
-            <p className="mt-2">
-              Note: Importing will replace all existing codes and groups.
-            </p>
-          </div>
+      }
+      title="Import Codebook"
+      description="Import a codebook from a previously exported file."
+    >
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label>Select File</Label>
+          <Input type="file" accept=".xml,.xlsx" onChange={handleImport} />
         </div>
-      </DialogContent>
-    </Dialog>
+        {error && <div className="text-sm text-destructive">{error}</div>}
+        <div className="text-sm text-muted-foreground">
+          <p>Supported formats:</p>
+          <ul className="list-disc pl-4 mt-1">
+            <li>REFI-QDA XML (.xml) - Exported from this application</li>
+            <li>Excel (.xlsx) - Exported from this application</li>
+          </ul>
+          <p className="mt-2">
+            Note: Importing will replace all existing codes and groups.
+          </p>
+        </div>
+      </div>
+    </Modal>
   );
 }

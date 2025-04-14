@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Download } from "lucide-react";
 import type { Code, CodeGroup } from "../types";
+import { Modal } from "@/components/ui/modal";
 
 interface ExportDialogProps {
   codes: Code[];
@@ -24,7 +25,7 @@ interface ExportDialogProps {
 }
 
 export function ExportDialog({ codes, codeGroups }: ExportDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [format, setFormat] = useState<"xml" | "excel">("xml");
   const [projectName, setProjectName] = useState("");
   const [authorName, setAuthorName] = useState("");
@@ -151,71 +152,73 @@ export function ExportDialog({ codes, codeGroups }: ExportDialogProps) {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
-    setIsOpen(false);
+    setOpen(false);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon" tooltip="Export">
+    <Modal
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
+        <Button
+          variant="outline"
+          size="icon"
+          tooltip="Export"
+          tooltipSide="right"
+        >
           <Download className="w-4 h-4" />
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Export Codebook</DialogTitle>
-          <DialogDescription>
-            Export your codebook in REFI-QDA XML or Excel format.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>Project Name</Label>
-            <Input
-              placeholder="Enter project name"
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Author</Label>
-            <Input
-              placeholder="Enter author name"
-              value={authorName}
-              onChange={(e) => setAuthorName(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Export Format</Label>
-            <RadioGroup
-              value={format}
-              onValueChange={(value) => setFormat(value as "xml" | "excel")}
-              className="space-y-2"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="xml" id="xml" />
-                <Label htmlFor="xml">REFI-QDA XML</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="excel" id="excel" />
-                <Label htmlFor="excel">Excel</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          <div className="flex gap-2 pt-4">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => setIsOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button className="flex-1" onClick={handleExport}>
-              Export
-            </Button>
-          </div>
+      }
+      title="Export Codebook"
+      description="Export your codebook in REFI-QDA XML or Excel format."
+    >
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label>Project Name</Label>
+          <Input
+            placeholder="Enter project name"
+            value={projectName}
+            onChange={(e) => setProjectName(e.target.value)}
+          />
         </div>
-      </DialogContent>
-    </Dialog>
+        <div className="space-y-2">
+          <Label>Author</Label>
+          <Input
+            placeholder="Enter author name"
+            value={authorName}
+            onChange={(e) => setAuthorName(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Export Format</Label>
+          <RadioGroup
+            value={format}
+            onValueChange={(value) => setFormat(value as "xml" | "excel")}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="xml" id="xml" />
+              <Label htmlFor="xml">REFI-QDA XML</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="excel" id="excel" />
+              <Label htmlFor="excel">Excel</Label>
+            </div>
+          </RadioGroup>
+        </div>
+        <div className="flex gap-2 pt-4">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button className="flex-1" onClick={handleExport}>
+            Export
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 }

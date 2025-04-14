@@ -16,6 +16,7 @@ import { motion } from "motion/react";
 import { NodeManager } from "../dialogs/NodeManager";
 import { CodeManager } from "../dialogs/CodeManager";
 import { DebugDialog } from "../dialogs/DebugDialog";
+import VRCanvas from "../3d";
 
 export function CanvasControls() {
   const { controls, canvas } = useCanvas();
@@ -93,14 +94,7 @@ export function CanvasControls() {
       <div className="absolute top-4 right-4 flex items-center gap-1 rounded-md bg-background/60 border border-border px-2 py-1.5 backdrop-blur-sm">
         <NodeManager />
         <CodeManager />
-        <Button
-          variant="ghost"
-          size="icon"
-          tooltip="Toggle VR"
-          tooltipSide="bottom"
-        >
-          <Box size={18} />
-        </Button>
+        <VRCanvas />
         <div className="h-6 w-px bg-border mx-1"></div>
         <ModeToggle />
         <Button

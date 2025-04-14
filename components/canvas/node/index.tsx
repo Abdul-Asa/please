@@ -95,7 +95,7 @@ function CanvasNode({ node }: { node: Node }) {
         maxHeight: isExpanded ? "none" : NODE_CONSTANTS.MAX_NODE_HEIGHT,
         height: isExpanded
           ? "calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)"
-          : "max-content",
+          : "auto",
         width: isExpanded
           ? "calc(100dvw - env(safe-area-inset-left) - env(safe-area-inset-right) - 2rem)"
           : "max-content",
