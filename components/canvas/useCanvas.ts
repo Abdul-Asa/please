@@ -725,7 +725,7 @@ export function useCanvas() {
   };
 
   const scrollToCodeSelection = (codeSelection: CodeSelection) => {
-    const { nodeId, from } = codeSelection;
+    const { nodeId, from, to } = codeSelection;
     scrollToNode(nodeId);
     setViewport((prev) => ({
       ...prev,
@@ -733,8 +733,8 @@ export function useCanvas() {
     }));
     const editor = getEditor(nodeId);
     if (!editor) return;
-    console.log(from);
-    editor.chain().focus(from, { scrollIntoView: true }).run();
+
+    editor.chain().focus().setTextSelection({ from, to }).run();
   };
 
   // Initialize the canvas

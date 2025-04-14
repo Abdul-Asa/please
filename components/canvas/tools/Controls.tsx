@@ -6,8 +6,8 @@ import {
   RotateCcw,
   Move,
   Box,
-  Search,
   Keyboard,
+  Search,
 } from "lucide-react";
 import { useCanvas } from "../useCanvas";
 import { cn } from "@/lib/utils";
@@ -93,14 +93,6 @@ export function CanvasControls() {
       <div className="absolute top-4 right-4 flex items-center gap-1 rounded-md bg-background/60 border border-border px-2 py-1.5 backdrop-blur-sm">
         <NodeManager />
         <CodeManager />
-        <Button
-          variant="ghost"
-          size="icon"
-          tooltip="Search"
-          tooltipSide="bottom"
-        >
-          <Search size={18} />
-        </Button>
         <Button
           variant="ghost"
           size="icon"

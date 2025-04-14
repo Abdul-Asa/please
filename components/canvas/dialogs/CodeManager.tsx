@@ -17,8 +17,6 @@ import {
   Info,
   Trash2,
   Plus,
-  Import,
-  Download,
   X,
   GripVertical,
 } from "lucide-react";
@@ -60,6 +58,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
+import { ExportDialog } from "./ExportDialog";
+import { ImportDialog } from "./ImportDialog";
 
 function SortableCode({
   isOpen,
@@ -100,7 +100,7 @@ function SortableCode({
       <div
         ref={setNodeRef}
         style={style}
-        className="flex items-center justify-between p-2 rounded-md group bg-white"
+        className="flex items-center justify-between p-2 rounded-md group bg-background"
       >
         <div className="flex items-center gap-2 flex-1">
           <div
@@ -372,6 +372,7 @@ export function CodeManager() {
     scrollToCodeSelection,
     getCodesByGroup,
     deleteCodeGroup,
+    addCode,
   } = controls;
   const [open, setOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
@@ -539,6 +540,31 @@ export function CodeManager() {
     });
   };
 
+  const handleImport = (importedCodes: Code[], importedGroups: CodeGroup[]) => {
+    // Clear existing codes and groups
+    codes.forEach((code) => deleteCode(code.id));
+    codeGroups.forEach((group) => deleteCodeGroup(group.id));
+
+    // Create a mapping between old and new group IDs
+    const groupIdMap = new Map<string, string>();
+
+    // Add imported groups and store the mapping
+    importedGroups.forEach((group) => {
+      const newGroup = addCodeGroup({ name: group.name });
+      groupIdMap.set(group.id, newGroup.id);
+    });
+
+    // Add imported codes with mapped group IDs
+    importedCodes.forEach((code) => {
+      addCode({
+        name: code.name,
+        color: code.color,
+        comment: code.comment,
+        groupId: code.groupId ? groupIdMap.get(code.groupId) : undefined,
+      });
+    });
+  };
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -551,7 +577,7 @@ export function CodeManager() {
           <Bookmark size={18} />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="sm:w-[400px] w-[calc(100vw-2rem)]">
+      <SheetContent side="right" className="sm:w-[400px] w-[calc(100vw-2rem)] ">
         <SheetHeader>
           <SheetTitle>Code Manager</SheetTitle>
           <SheetDescription>
@@ -588,13 +614,13 @@ export function CodeManager() {
             </DialogContent>
           </Dialog>
 
-          <Button variant="outline" size="icon" tooltip="Import">
-            <Import className="w-4 h-4" />
-          </Button>
+          <ImportDialog
+            codes={codes}
+            codeGroups={codeGroups}
+            onImport={handleImport}
+          />
 
-          <Button variant="outline" size="icon" tooltip="Export">
-            <Download className="w-4 h-4" />
-          </Button>
+          <ExportDialog codes={codes} codeGroups={codeGroups} />
         </div>
 
         <DndContext
@@ -603,7 +629,7 @@ export function CodeManager() {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-auto h-[calc(100vh-220px)]">
             {/* Ungrouped Codes */}
             <div>
               <UngroupedHeader

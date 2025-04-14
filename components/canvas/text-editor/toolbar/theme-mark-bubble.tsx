@@ -65,7 +65,7 @@ export const ThemeMarkBubble = ({ editor }: ThemeMarkBubbleProps) => {
   if (!isVisible) return null;
 
   return (
-    <div className="absolute top-0 right-0 bg-white shadow-md rounded-md p-2 flex flex-col gap-1 items-start min-w-[200px] z-50">
+    <div className="absolute top-0 right-0 bg-card border border-border shadow-md rounded-md p-2 flex flex-col gap-1 items-start min-w-[200px] z-50">
       <div className="flex items-center justify-between w-full">
         <h3 className="font-semibold">Codes</h3>
         <Button

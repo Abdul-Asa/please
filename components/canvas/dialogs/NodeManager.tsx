@@ -121,7 +121,7 @@ export function NodeManager() {
           </AlertDialog>
         </div>
 
-        <div className="space-y-2 mt-4">
+        <div className="space-y-2 mt-4 overflow-y-auto h-[calc(100vh-220px)]">
           {nodes.map((node, index) => (
             <React.Fragment key={node.id}>
               <div

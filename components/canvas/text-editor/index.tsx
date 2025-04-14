@@ -25,6 +25,7 @@ import {
   UnmarkToolbar,
   ThemeMarkBubble,
 } from "./toolbar";
+import Highlight from "@tiptap/extension-highlight";
 import { motion } from "motion/react";
 import { useCanvas } from "../useCanvas";
 
@@ -65,6 +66,12 @@ const extensions = [
   ThemeMark.configure({
     HTMLAttributes: {
       class: "theme-mark",
+    },
+  }),
+  Highlight.configure({
+    multicolor: true,
+    HTMLAttributes: {
+      class: "bg-primary text-primary-foreground",
     },
   }),
 ];

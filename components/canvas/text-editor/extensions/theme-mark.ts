@@ -1,5 +1,4 @@
 import { Mark, mergeAttributes } from "@tiptap/core";
-import { Plugin } from "prosemirror-state";
 
 export interface ThemeMarkOptions {
   HTMLAttributes: Record<string, any>;
