@@ -85,7 +85,14 @@ export default function VRCanvas() {
           onClick={() => {
             endSession();
             updateViewport({ is3D: "AR" });
-            xrStore.enterAR();
+            xrStore
+              .enterAR()
+              .then(() => {
+                console.log("AR entered");
+              })
+              .catch((error) => {
+                alert("Error entering AR:" + error);
+              });
           }}
           style={{
             position: "fixed",
@@ -110,7 +117,14 @@ export default function VRCanvas() {
           onClick={() => {
             endSession();
             updateViewport({ is3D: "VR" });
-            xrStore.enterVR();
+            xrStore
+              .enterVR()
+              .then(() => {
+                console.log("VR entered");
+              })
+              .catch((error) => {
+                alert("Error entering VR:" + error);
+              });
           }}
           style={{
             position: "fixed",

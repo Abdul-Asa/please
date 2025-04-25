@@ -174,9 +174,6 @@ export function Sphere({
   position = [0, 5, -8],
   scale = 1,
 }: SphereProps) {
-  useFrame((s) =>
-    console.log(...s.camera.getWorldPosition(new Vector3()).toArray())
-  );
   return (
     <Float floatIntensity={floatIntensity}>
       <mesh castShadow position={position} scale={scale}>
