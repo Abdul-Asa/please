@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { useEffect, useState } from "react";
 import { Box, Glasses, Smartphone } from "lucide-react";
-import { VR } from "./VRcanvas";
 import { useCanvas } from "../useCanvas";
 
 export function VRCanvas() {
@@ -35,51 +34,26 @@ export function VRCanvas() {
       title="Enter Virtual/Augmented Reality"
       description="Choose your preferred immersive experience"
     >
-      <div className="flex gap-4">
-        {!isXRSupported ? (
-          <>
-            <Button
-              className="w-full h-20 flex items-center justify-center"
-              variant="outline"
-              onClick={() => {
-                controls.updateViewport({ is3D: "VR" });
-                setOpen(false);
-              }}
-            >
-              <Glasses className="mr-2 h-4 w-4" />
-              Enter VR
-            </Button>
-            <Button
-              className="w-full h-20 flex items-center justify-center"
-              variant="outline"
-              onClick={() => {
-                controls.updateViewport({ is3D: "AR" });
-                setOpen(false);
-              }}
-            >
-              <Smartphone className="mr-2 h-4 w-4" />
-              Enter AR
-            </Button>
-          </>
-        ) : (
+      <div className="flex gap-4 flex-col">
+        {!isXRSupported && (
           <div className="flex flex-col gap-4">
             <div className="text-center text-muted-foreground">
               Your device does not support VR/AR experiences. Please try on a
-              compatible device.
+              compatible device. You can still try 3D view.
             </div>
-            {/* <Button
-              className="w-full h-20 flex items-center justify-center"
-              variant="outline"
-              onClick={() => {
-                controls.updateViewport({ is3D: "3D" });
-                setOpen(false);
-              }}
-            >
-              <Box className="mr-2 h-4 w-4" />
-              Enter 3D
-            </Button> */}
           </div>
         )}
+        <Button
+          className="w-full h-20 flex items-center justify-center"
+          variant="outline"
+          onClick={() => {
+            controls.updateViewport({ is3D: "3D" });
+            setOpen(false);
+          }}
+        >
+          <Smartphone className="mr-2 h-4 w-4" />
+          Enter 3D
+        </Button>
       </div>
     </Modal>
   );
