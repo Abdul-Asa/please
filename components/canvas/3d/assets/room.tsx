@@ -50,6 +50,7 @@ export function Model(props: GroupProps) {
           receiveShadow
           geometry={nodes.Object_6.geometry}
           material={materials.krzeslo_1}
+          position={[0, 0, 0]}
         />
         <mesh
           castShadow
