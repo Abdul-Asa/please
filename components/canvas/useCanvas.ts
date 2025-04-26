@@ -435,6 +435,7 @@ export function useCanvas() {
       y: position.y,
       width: NODE_CONSTANTS.TEXT_NODE_WIDTH,
       height: NODE_CONSTANTS.NODE_HEIGHT,
+      vrText: "New text",
     };
 
     setNodes((prev) => [...prev, newNode]);
@@ -451,22 +452,11 @@ export function useCanvas() {
     const nodeId = nanoid();
     const fileName = file.name || "File-" + nanoid(6);
 
-    // Create the base node
-    const newNode: FileNode = {
-      id: nodeId,
-      type: "file",
-      file: fileName,
-      label: fileName,
-      x: position.x,
-      y: position.y,
-      width: NODE_CONSTANTS.FILE_NODE_WIDTH,
-      height: NODE_CONSTANTS.NODE_HEIGHT,
-      fileType: fileType,
-    };
+    let content = "";
 
     try {
       // Read the file content
-      const content = await readFileContent(file);
+      content = await readFileContent(file);
 
       // Store in IndexedDB
       const fileContent: FileContent = {
@@ -483,6 +473,19 @@ export function useCanvas() {
       console.error("Error processing file:", error);
       // Continue with node creation even if file processing fails
     }
+    // Create the base node
+    const newNode: FileNode = {
+      id: nodeId,
+      type: "file",
+      file: fileName,
+      label: fileName,
+      x: position.x,
+      y: position.y,
+      width: NODE_CONSTANTS.FILE_NODE_WIDTH,
+      height: NODE_CONSTANTS.NODE_HEIGHT,
+      fileType: fileType,
+      vrText: content,
+    };
 
     setNodes((prev) => [...prev, newNode]);
     setViewport((prev) => ({

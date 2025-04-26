@@ -9,12 +9,12 @@ import {
   noEvents,
   PointerEvents,
 } from "@react-three/xr";
-import { OrbitHandles } from "@react-three/handle";
 import { Canvas } from "@react-three/fiber";
 import { useCanvas } from "../useCanvas";
 import { Model as Room, Light, Sphere } from "./assets/room";
-import { NodePanel } from "./assets/panel";
-
+import NodePanel from "./assets/panel";
+import { Node } from "../types";
+import { useTheme } from "next-themes";
 const xrStore = createXRStore({
   foveation: 0,
   emulate: { syntheticEnvironment: false },
@@ -22,6 +22,7 @@ const xrStore = createXRStore({
 
 function NonAREnvironment() {
   const inAR = useXR((s) => s.mode === "immersive-ar");
+  const { theme } = useTheme();
   if (inAR) return null;
   return (
     <>
@@ -31,7 +32,7 @@ function NonAREnvironment() {
       </IfInSessionMode>
       <color attach="background" args={["#d0d0d0"]} />
       <fog attach="fog" args={["#d0d0d0", 8, 35]} />
-      <ambientLight intensity={0.4} />
+      <ambientLight intensity={theme === "light" ? 0.1 : 0.4} />
       <Light />
       <Room scale={0.5} position={[0, -1, 0]} />
       <Sphere />
@@ -43,8 +44,28 @@ function NonAREnvironment() {
 }
 
 export default function VRCanvas() {
-  const { controls } = useCanvas();
+  const { controls, canvas } = useCanvas();
   const { updateViewport } = controls;
+  const { nodes } = canvas;
+
+  const calculateArcPositions = (nodes: Node[]) => {
+    const maxWidth = 3;
+    const radius = 1; // Distance from user
+    const angleStep = Math.PI / 4; // 45 degrees between nodes
+    const startAngle = -Math.PI / 4; // Start at -45 degrees
+
+    return nodes.map((node, index) => {
+      const row = Math.floor(index / maxWidth);
+      const col = index % maxWidth;
+      const angle = startAngle + col * angleStep;
+      const x = Math.sin(angle) * radius;
+      const z = -Math.cos(angle) * radius - 0.6; // -0.6 to match original z position
+      const y = row * 0.4 + 0.2; // 0.2 to match original y position
+      return [x, y, z] as [number, number, number];
+    });
+  };
+
+  const positions = calculateArcPositions(nodes);
 
   return (
     <>
@@ -58,13 +79,16 @@ export default function VRCanvas() {
           flexGrow: 1,
         }}
         gl={{ localClippingEnabled: true }}
+        events={noEvents}
       >
         <PointerEvents batchEvents={false} />
         {/* <OrbitHandles /> */}
         <XR store={xrStore}>
           <NonAREnvironment />
           <XROrigin position={[0, 0, 0]} />
-          <NodePanel position={[0, 0.2, -0.6]} />
+          {nodes.map((node, index) => (
+            <NodePanel key={node.id} node={node} position={positions[index]} />
+          ))}
         </XR>
       </Canvas>
       <div

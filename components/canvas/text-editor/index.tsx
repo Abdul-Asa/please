@@ -78,7 +78,7 @@ const extensions = [
 
 interface EditorProps {
   content?: string;
-  onChange?: (content: string) => void;
+  onChange?: ({ content, text }: { content: string; text: string }) => void;
   className?: string;
   nodeId: string;
 }
@@ -99,7 +99,10 @@ const Editor = ({ content, onChange, className, nodeId }: EditorProps) => {
       scrollMargin: 180,
     },
     onUpdate: ({ editor }) => {
-      onChange?.(editor.getHTML());
+      onChange?.({
+        content: editor.getHTML(),
+        text: editor.getText(),
+      });
       setIsEditable(editor.isEditable);
     },
     onCreate: ({ editor }) => {

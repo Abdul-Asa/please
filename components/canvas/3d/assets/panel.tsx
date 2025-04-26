@@ -1,55 +1,31 @@
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import {
-  createXRStore,
-  noEvents,
-  PointerEvents,
-  useXR,
-  XR,
-  XROrigin,
-} from "@react-three/xr";
-import { Environment } from "@react-three/drei";
+"use client";
+import { useFrame } from "@react-three/fiber";
 import {
   Container,
   Text,
-  Image,
   Root,
-  setPreferredColorScheme,
   ComponentInternals,
   DefaultProperties,
   MetalMaterial,
+  setPreferredColorScheme,
+  PreferredColorScheme,
 } from "@react-three/uikit";
 import { Button, colors, Defaults } from "@react-three/uikit-default";
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  BackpackIcon,
-  ConstructionIcon,
-  ExpandIcon,
-  HeartIcon,
-  ListIcon,
-  MenuIcon,
-  PlayIcon,
-} from "@react-three/uikit-lucide";
+import { ExpandIcon } from "@react-three/uikit-lucide";
 import { forwardRef, RefObject, useMemo, useRef } from "react";
-import {
-  Handle,
-  HandleStore,
-  HandleTarget,
-  OrbitHandles,
-  useHandle,
-} from "@react-three/handle";
+import { Handle, HandleStore, HandleTarget } from "@react-three/handle";
 import {
   Euler,
   Group,
   MeshPhongMaterial,
-  MeshPhysicalMaterial,
   Object3D,
   Quaternion,
-  StaticReadUsage,
   Vector3,
 } from "three";
 import { clamp, damp } from "three/src/math/MathUtils.js";
-import { Signal, computed } from "@preact/signals";
+import { Signal } from "@preact/signals";
+import { Node } from "../../types";
+import { useTheme } from "next-themes";
 
 class GlassMaterial extends MeshPhongMaterial {
   constructor() {
@@ -59,7 +35,6 @@ class GlassMaterial extends MeshPhongMaterial {
     });
   }
 }
-setPreferredColorScheme("dark");
 
 const eulerHelper = new Euler();
 const quaternionHelper = new Quaternion();
@@ -67,11 +42,16 @@ const vectorHelper1 = new Vector3();
 const vectorHelper2 = new Vector3();
 const zAxis = new Vector3(0, 0, 1);
 
-export function NodePanel({
+export default function NodePanel({
   position = [0, 0, 0],
+  node,
 }: {
   position?: [number, number, number];
+  node: Node;
 }) {
+  const { theme } = useTheme();
+  setPreferredColorScheme(theme as PreferredColorScheme);
+
   const ref = useRef<Group>(null);
   const storeRef = useRef<HandleStore<any>>(null);
   useFrame((state, dt) => {
@@ -93,7 +73,7 @@ export function NodePanel({
     );
   });
   const height = useMemo(() => new Signal(450), []);
-  const width = useMemo(() => new Signal(700), []);
+  const width = useMemo(() => new Signal(500), []);
   const intialMaxHeight = useRef<number>(undefined);
   const intialWidth = useRef<number>(undefined);
   const containerRef = useRef<ComponentInternals>(null);
@@ -106,6 +86,7 @@ export function NodePanel({
     []
   );
   const innerTarget = useRef<Group>(null);
+
   return (
     <group position={position}>
       <HandleTarget>
@@ -139,8 +120,8 @@ export function NodePanel({
                         );
                         width.value = clamp(
                           state.current.scale.x * intialWidth.current,
-                          300,
-                          1000
+                          400,
+                          800
                         );
                       }
                     }}
@@ -181,12 +162,12 @@ export function NodePanel({
                       paddingBottom={4}
                       backgroundColor={colors.background}
                       borderRadius={16}
-                      panelMaterialClass={MetalMaterial}
+                      panelMaterialClass={GlassMaterial}
                       borderBend={0.4}
                       borderWidth={4}
                       flexDirection="row"
                       gapColumn={16}
-                      width="90%"
+                      width="100%"
                       zIndexOffset={10}
                       transformTranslateZ={10}
                       marginTop={-30}
@@ -196,11 +177,11 @@ export function NodePanel({
                         fontSize={14}
                         fontWeight={500}
                         lineHeight={28}
-                        color="rgb(17,24,39)"
-                        dark={{ color: "rgb(243,244,246)" }}
+                        color="rgb(0,0,0)"
+                        dark={{ color: "rgb(255,255,255)" }}
                         flexDirection="column"
                       >
-                        Node Panel
+                        {node.label || node.type}
                       </Text>
                       <Container flexGrow={1} />
                       <Button
@@ -208,7 +189,7 @@ export function NodePanel({
                         variant="ghost"
                         onClick={() => {
                           height.value = 450;
-                          width.value = 700;
+                          width.value = 500;
                         }}
                       >
                         <ExpandIcon
@@ -229,6 +210,11 @@ export function NodePanel({
                       backgroundColor={colors.background}
                       borderRadius={16}
                       borderWidth={4}
+                      borderColor={colors.background}
+                      width="100%"
+                      hover={{
+                        borderColor: colors.accent,
+                      }}
                     >
                       <Container
                         flexShrink={0}
@@ -236,30 +222,18 @@ export function NodePanel({
                         flexDirection="column"
                         gapRow={16}
                         padding={32}
+                        width="100%"
                       >
                         <Text
                           fontSize={16}
                           lineHeight={24}
-                          color="rgb(17,24,39)"
-                          dark={{ color: "rgb(243,244,246)" }}
+                          color="rgb(0,0,0)"
+                          dark={{ color: "rgb(255,255,255)" }}
+                          width="100%"
+                          fontWeight={400}
+                          letterSpacing={0.5}
                         >
-                          Lorem ipsum dolor sit amet, consectetur adipiscing
-                          elit. Sed do eiusmod tempor incididunt ut labore et
-                          dolore magna aliqua. Ut enim ad minim veniam, quis
-                          nostrud exercitation ullamco laboris nisi ut aliquip
-                          ex ea commodo consequat.
-                        </Text>
-                        <Text
-                          fontSize={16}
-                          lineHeight={24}
-                          color="rgb(17,24,39)"
-                          dark={{ color: "rgb(243,244,246)" }}
-                        >
-                          Duis aute irure dolor in reprehenderit in voluptate
-                          velit esse cillum dolore eu fugiat nulla pariatur.
-                          Excepteur sint occaecat cupidatat non proident, sunt
-                          in culpa qui officia deserunt mollit anim id est
-                          laborum.
+                          {node.vrText}
                         </Text>
                       </Container>
                     </Container>

@@ -5,8 +5,17 @@ import { Editor } from "../text-editor";
 export function TextNodeContent({ node }: { node: TextNode }) {
   const { controls } = useCanvas();
 
-  const handleContentChange = (newContent: string) => {
-    controls.updateNode(node.id, { text: newContent });
+  const handleContentChange = ({
+    content,
+    text,
+  }: {
+    content: string;
+    text: string;
+  }) => {
+    controls.updateNode(node.id, {
+      text: content,
+      vrText: text,
+    });
   };
 
   return (

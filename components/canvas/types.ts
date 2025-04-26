@@ -12,6 +12,7 @@ interface BaseNode {
   height: number;
   label?: string;
   editor?: Editor;
+  vrText?: string;
 }
 
 export interface TextNode extends BaseNode {

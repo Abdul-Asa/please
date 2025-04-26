@@ -6,7 +6,9 @@ import { getFileContent, storeFileContent } from "../store";
 import { Editor } from "../text-editor";
 
 export function FileNodeContent({ node }: { node: FileNode }) {
-  const { canvas } = useCanvas();
+  const {
+    controls: { updateNode },
+  } = useCanvas();
   const [fileContent, setFileContent] = useState<FileContent>();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -27,11 +29,20 @@ export function FileNodeContent({ node }: { node: FileNode }) {
     fetchFileContent();
   }, [node.fileType, node.file]);
 
-  const handleContentChange = (newContent: string) => {
+  const handleContentChange = ({
+    content,
+    text,
+  }: {
+    content: string;
+    text: string;
+  }) => {
     if (fileContent?.type === "text") {
       setFileContent({
         ...fileContent,
-        content: newContent,
+        content: content,
+      });
+      updateNode(node.id, {
+        vrText: text,
       });
       storeFileContent(fileContent);
     }
