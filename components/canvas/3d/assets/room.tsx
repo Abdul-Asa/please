@@ -149,7 +149,7 @@ export function Light() {
       <directionalLight
         position={[5, 5, -8]}
         castShadow
-        intensity={5}
+        intensity={8}
         shadow-mapSize={2048}
         shadow-bias={-0.001}
       >
@@ -158,6 +158,7 @@ export function Light() {
           args={[-8.5, 8.5, 8.5, -8.5, 0.1, 20]}
         />
       </directionalLight>
+      <ambientLight intensity={0.8} />
     </group>
   );
 }

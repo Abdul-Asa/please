@@ -14,6 +14,7 @@ import { Canvas } from "@react-three/fiber";
 import { useCanvas } from "../useCanvas";
 import { Model as Room, Light, Sphere } from "./assets/room";
 import { NodePanel } from "./assets/panel";
+
 const xrStore = createXRStore({
   foveation: 0,
   emulate: { syntheticEnvironment: false },
@@ -45,15 +46,11 @@ export default function VRCanvas() {
   const { controls } = useCanvas();
   const { updateViewport } = controls;
 
-  const endSession = () => {
-    xrStore.getState().session?.end();
-  };
-
   return (
     <>
       <Canvas
         shadows
-        camera={{ position: [5, 2, 10], fov: 50 }}
+        // camera={{ position: [5, 2, 10], fov: 50 }}
         style={{
           position: "fixed",
           width: "100%",
@@ -84,8 +81,8 @@ export default function VRCanvas() {
         }}
       >
         <button
-          onClick={() => {
-            endSession();
+          onClick={async () => {
+            await xrStore.getState().session?.end();
             updateViewport({ is3D: "AR" });
             xrStore
               .enterAR()
@@ -116,8 +113,8 @@ export default function VRCanvas() {
           Enter AR
         </button>
         <button
-          onClick={() => {
-            endSession();
+          onClick={async () => {
+            await xrStore.getState().session?.end();
             updateViewport({ is3D: "VR" });
             xrStore
               .enterVR()
@@ -150,7 +147,7 @@ export default function VRCanvas() {
         <button
           onClick={() => {
             updateViewport({ is3D: null });
-            endSession();
+            xrStore.getState().session?.end();
           }}
           style={{
             position: "fixed",

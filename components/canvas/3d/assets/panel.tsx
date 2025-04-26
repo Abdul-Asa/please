@@ -18,7 +18,7 @@ import {
   DefaultProperties,
   MetalMaterial,
 } from "@react-three/uikit";
-import { Button, colors, Defaults, Slider } from "@react-three/uikit-default";
+import { Button, colors, Defaults } from "@react-three/uikit-default";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -41,6 +41,7 @@ import {
 import {
   Euler,
   Group,
+  MeshPhongMaterial,
   MeshPhysicalMaterial,
   Object3D,
   Quaternion,
@@ -50,8 +51,14 @@ import {
 import { clamp, damp } from "three/src/math/MathUtils.js";
 import { Signal, computed } from "@preact/signals";
 
-export class GlassMaterial extends MeshPhysicalMaterial {}
-
+class GlassMaterial extends MeshPhongMaterial {
+  constructor() {
+    super({
+      specular: 0x111111,
+      shininess: 100,
+    });
+  }
+}
 setPreferredColorScheme("dark");
 
 const eulerHelper = new Euler();
@@ -87,23 +94,6 @@ export function NodePanel({
   });
   const height = useMemo(() => new Signal(450), []);
   const width = useMemo(() => new Signal(700), []);
-  const menuWidth = useMemo(() => new Signal(200), []);
-  const showSidePanel = useMemo(
-    () => computed(() => width.value > 500),
-    [width]
-  );
-  const sidePanelDisplay = useMemo(
-    () => computed(() => (showSidePanel.value ? "flex" : "none")),
-    [showSidePanel]
-  );
-  const borderLeftRadius = useMemo(
-    () => computed(() => (showSidePanel.value ? 0 : 16)),
-    [showSidePanel]
-  );
-  const paddingLeft = useMemo(
-    () => computed(() => (showSidePanel.value ? 20 : 0)),
-    [showSidePanel]
-  );
   const intialMaxHeight = useRef<number>(undefined);
   const intialWidth = useRef<number>(undefined);
   const containerRef = useRef<ComponentInternals>(null);
@@ -201,13 +191,7 @@ export function NodePanel({
                       transformTranslateZ={10}
                       marginTop={-30}
                       maxWidth={350}
-                      pointerEvents="none"
                     >
-                      <MenuIcon
-                        width={16}
-                        color="rgb(17,24,39)"
-                        dark={{ color: "rgb(243,244,246)" }}
-                      />
                       <Text
                         fontSize={14}
                         fontWeight={500}
@@ -216,268 +200,67 @@ export function NodePanel({
                         dark={{ color: "rgb(243,244,246)" }}
                         flexDirection="column"
                       >
-                        Music Player
+                        Node Panel
                       </Text>
                       <Container flexGrow={1} />
-                      <ExpandIcon
-                        width={16}
-                        color="rgb(17,24,39)"
-                        dark={{ color: "rgb(243,244,246)" }}
-                      />
-                      <ConstructionIcon
-                        width={16}
-                        color="rgb(17,24,39)"
-                        dark={{ color: "rgb(243,244,246)" }}
-                      />
-                    </Container>
-                    <Container width="100%" flexDirection="row" flexGrow={1}>
-                      <Container
-                        display={sidePanelDisplay}
-                        flexDirection="column"
-                        borderLeftRadius={16}
-                        backgroundColor="#555555"
-                        borderColor="#555555"
-                        panelMaterialClass={GlassMaterial}
-                        borderWidth={4}
-                        borderRightWidth={2}
-                        borderBend={0.4}
-                        width={menuWidth}
-                        height="100%"
-                        padding={16}
-                        gapRow={16}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => {
+                          height.value = 450;
+                          width.value = 700;
+                        }}
                       >
-                        <WidthHandle
-                          targetRef={innerTarget}
-                          width={menuWidth}
+                        <ExpandIcon
+                          width={16}
+                          color="rgb(17,24,39)"
+                          dark={{ color: "rgb(243,244,246)" }}
                         />
-                        <Text
-                          marginBottom={8}
-                          fontSize={20}
-                          fontWeight="semi-bold"
-                          color={colors.cardForeground}
-                        >
-                          Your Content
-                        </Text>
-
-                        <Container
-                          flexDirection="row"
-                          alignItems="center"
-                          justifyContent="space-between"
-                        >
-                          <Text color={colors.cardForeground}>Playlists</Text>
-                          <ListIcon width={16} color={colors.cardForeground} />
-                        </Container>
-                        <Container
-                          flexDirection="row"
-                          alignItems="center"
-                          justifyContent="space-between"
-                        >
-                          <Text color={colors.cardForeground}>Favorites</Text>
-                          <HeartIcon width={16} color={colors.cardForeground} />
-                        </Container>
-
-                        <Container
-                          flexDirection="row"
-                          alignItems="center"
-                          justifyContent="space-between"
-                        >
-                          <Text color={colors.cardForeground}>History</Text>
-                          <BackpackIcon
-                            width={16}
-                            color={colors.cardForeground}
-                          />
-                        </Container>
-                      </Container>
+                      </Button>
+                    </Container>
+                    <Container
+                      flexGrow={1}
+                      scrollbarBorderRadius={4}
+                      scrollbarOpacity={0.2}
+                      flexDirection="column"
+                      overflow="scroll"
+                      panelMaterialClass={GlassMaterial}
+                      borderBend={0.4}
+                      backgroundColor={colors.background}
+                      borderRadius={16}
+                      borderWidth={4}
+                    >
                       <Container
-                        flexGrow={1}
-                        scrollbarBorderRadius={4}
-                        scrollbarOpacity={0.2}
+                        flexShrink={0}
+                        display="flex"
                         flexDirection="column"
-                        overflow="scroll"
-                        paddingLeft={paddingLeft}
-                        panelMaterialClass={GlassMaterial}
-                        borderBend={0.4}
-                        backgroundColor={colors.background}
-                        borderRadius={16}
-                        borderLeftRadius={borderLeftRadius}
-                        borderWidth={4}
-                        borderLeftWidth={0}
+                        gapRow={16}
+                        padding={32}
                       >
-                        <Container
-                          flexShrink={0}
-                          display="flex"
-                          flexDirection="column"
-                          gapRow={16}
-                          padding={32}
+                        <Text
+                          fontSize={16}
+                          lineHeight={24}
+                          color="rgb(17,24,39)"
+                          dark={{ color: "rgb(243,244,246)" }}
                         >
-                          <Container
-                            display="flex"
-                            alignItems="center"
-                            flexDirection="row"
-                            gapColumn={16}
-                          >
-                            <Image
-                              height={64}
-                              src="picture.jpg"
-                              width={64}
-                              aspectRatio={1}
-                              objectFit="cover"
-                              borderRadius={1000}
-                              flexDirection="column"
-                            ></Image>
-                            <Container
-                              flexGrow={1}
-                              flexShrink={1}
-                              flexBasis="0%"
-                              flexDirection="column"
-                              gapRow={4}
-                            >
-                              <Text
-                                fontSize={18}
-                                fontWeight={500}
-                                lineHeight={28}
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                                flexDirection="column"
-                              >
-                                Blowin' in the Wind
-                              </Text>
-                              <Text
-                                fontSize={14}
-                                lineHeight={20}
-                                color="rgb(107,114,128)"
-                                dark={{ color: "rgb(156,163,175)" }}
-                                flexDirection="column"
-                              >
-                                Bob Dylan
-                              </Text>
-                            </Container>
-                          </Container>
-                          <Slider />
-                          <Container
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="space-between"
-                          >
-                            <Button size="icon" variant="ghost">
-                              <ArrowLeftIcon
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                              />
-                            </Button>
-                            <Button size="icon" variant="ghost" padding={8}>
-                              <PlayIcon
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                              />
-                            </Button>
-                            <Button size="icon" variant="ghost">
-                              <ArrowRightIcon
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                              />
-                            </Button>
-                          </Container>
-                        </Container>
-                        <Container
-                          flexShrink={0}
-                          padding={16}
-                          flexDirection="column"
+                          Lorem ipsum dolor sit amet, consectetur adipiscing
+                          elit. Sed do eiusmod tempor incididunt ut labore et
+                          dolore magna aliqua. Ut enim ad minim veniam, quis
+                          nostrud exercitation ullamco laboris nisi ut aliquip
+                          ex ea commodo consequat.
+                        </Text>
+                        <Text
+                          fontSize={16}
+                          lineHeight={24}
+                          color="rgb(17,24,39)"
+                          dark={{ color: "rgb(243,244,246)" }}
                         >
-                          <Text
-                            fontSize={18}
-                            fontWeight={500}
-                            lineHeight={28}
-                            color="rgb(17,24,39)"
-                            dark={{ color: "rgb(243,244,246)" }}
-                            marginBottom={8}
-                            flexDirection="column"
-                          >
-                            Playlist
-                          </Text>
-                          <Container flexDirection="column" gapRow={16}>
-                            <Container
-                              display="flex"
-                              alignItems="center"
-                              justifyContent="space-between"
-                            >
-                              <Text
-                                fontSize={14}
-                                lineHeight={20}
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                                flexDirection="column"
-                              >
-                                Like a Rolling Stone
-                              </Text>
-                              <PlayIcon
-                                width={20}
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                              />
-                            </Container>
-                            <Container
-                              display="flex"
-                              alignItems="center"
-                              justifyContent="space-between"
-                            >
-                              <Text
-                                fontSize={14}
-                                lineHeight={20}
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                                flexDirection="column"
-                              >
-                                The Times They Are a-Changin'
-                              </Text>
-                              <PlayIcon
-                                width={20}
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                              />
-                            </Container>
-                            <Container
-                              display="flex"
-                              alignItems="center"
-                              justifyContent="space-between"
-                            >
-                              <Text
-                                fontSize={14}
-                                lineHeight={20}
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                                flexDirection="column"
-                              >
-                                Subterranean Homesick Blues
-                              </Text>
-                              <PlayIcon
-                                width={20}
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                              />
-                            </Container>
-                            <Container
-                              display="flex"
-                              alignItems="center"
-                              justifyContent="space-between"
-                            >
-                              <Text
-                                fontSize={14}
-                                lineHeight={20}
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                                flexDirection="column"
-                              >
-                                Like a Rolling Stone
-                              </Text>
-                              <PlayIcon
-                                width={20}
-                                color="rgb(17,24,39)"
-                                dark={{ color: "rgb(243,244,246)" }}
-                              />
-                            </Container>
-                          </Container>
-                        </Container>
+                          Duis aute irure dolor in reprehenderit in voluptate
+                          velit esse cillum dolore eu fugiat nulla pariatur.
+                          Excepteur sint occaecat cupidatat non proident, sunt
+                          in culpa qui officia deserunt mollit anim id est
+                          laborum.
+                        </Text>
                       </Container>
                     </Container>
                   </Container>
@@ -489,65 +272,6 @@ export function NodePanel({
         </group>
       </HandleTarget>
     </group>
-  );
-}
-
-function WidthHandle({
-  width,
-  targetRef,
-}: {
-  width: Signal<number>;
-  targetRef: RefObject<Object3D | null>;
-}) {
-  const containerRef = useRef<ComponentInternals>(null);
-  const handleRef = useMemo(
-    () =>
-      new Proxy<RefObject<Object3D | null>>(
-        { current: null },
-        { get: () => containerRef.current?.interactionPanel }
-      ),
-    []
-  );
-  const initialWidth = useRef<number>(undefined);
-  return (
-    <Handle
-      apply={(state) => {
-        if (state.first) {
-          initialWidth.current = width.value;
-        } else if (
-          initialWidth.current != null &&
-          containerRef.current != null
-        ) {
-          width.value = clamp(
-            initialWidth.current +
-              state.offset.position.x / containerRef.current.pixelSize.value,
-            150,
-            300
-          );
-        }
-      }}
-      handleRef={handleRef}
-      targetRef={targetRef}
-      scale={false}
-      multitouch={false}
-      rotate={false}
-    >
-      <Container
-        ref={containerRef}
-        positionType="absolute"
-        height="90%"
-        maxHeight={200}
-        positionRight={-20}
-        positionTop="50%"
-        transformTranslateY="-50%"
-        width={10}
-        backgroundColor="white"
-        backgroundOpacity={0.2}
-        borderRadius={5}
-        hover={{ backgroundOpacity: 0.5 }}
-        cursor="pointer"
-      ></Container>
-    </Handle>
   );
 }
 
