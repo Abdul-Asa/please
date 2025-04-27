@@ -1,40 +1,33 @@
-"use client";
-import { useFrame } from "@react-three/fiber";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  Button,
+  colors,
+} from "@react-three/uikit-default";
 import {
   Container,
   Text,
   Root,
+  GlassMaterial,
   ComponentInternals,
-  DefaultProperties,
-  MetalMaterial,
-  setPreferredColorScheme,
   PreferredColorScheme,
+  setPreferredColorScheme,
 } from "@react-three/uikit";
-import { Button, colors, Defaults } from "@react-three/uikit-default";
-import { ExpandIcon } from "@react-three/uikit-lucide";
-import { forwardRef, RefObject, useMemo, useRef } from "react";
-import { Handle, HandleStore, HandleTarget } from "@react-three/handle";
 import {
-  Euler,
-  Group,
-  MeshPhongMaterial,
-  Object3D,
-  Quaternion,
-  Vector3,
-} from "three";
-import { clamp, damp } from "three/src/math/MathUtils.js";
+  MaximizeIcon,
+  Trash2Icon,
+  TypeIcon,
+  FileIcon,
+} from "@react-three/uikit-lucide";
+import { Handle, HandleStore, HandleTarget } from "@react-three/handle";
+import { forwardRef, RefObject, useMemo, useRef, useState } from "react";
+import { Euler, Group, Quaternion, Vector3, Object3D, MathUtils } from "three";
+import { useFrame } from "@react-three/fiber";
 import { Signal } from "@preact/signals";
-import { Node } from "../../types";
 import { useTheme } from "next-themes";
-
-class GlassMaterial extends MeshPhongMaterial {
-  constructor() {
-    super({
-      specular: 0x111111,
-      shininess: 100,
-    });
-  }
-}
+import { useCanvas } from "../../useCanvas";
+import { Node } from "../../types";
 
 const eulerHelper = new Euler();
 const quaternionHelper = new Quaternion();
@@ -43,17 +36,21 @@ const vectorHelper2 = new Vector3();
 const zAxis = new Vector3(0, 0, 1);
 
 export default function NodePanel({
-  position = [0, 0, 0],
   node,
+  position,
 }: {
-  position?: [number, number, number];
   node: Node;
+  position: [number, number, number];
 }) {
-  const { theme } = useTheme();
-  setPreferredColorScheme(theme as PreferredColorScheme);
-
   const ref = useRef<Group>(null);
   const storeRef = useRef<HandleStore<any>>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { theme } = useTheme();
+  const {
+    controls: { deleteNode },
+  } = useCanvas();
+  setPreferredColorScheme(theme as PreferredColorScheme);
+
   useFrame((state, dt) => {
     if (ref.current == null || storeRef.current?.getState() == null) {
       return;
@@ -65,17 +62,18 @@ export default function NodePanel({
       vectorHelper1.sub(vectorHelper2).normalize()
     );
     eulerHelper.setFromQuaternion(quaternionHelper, "YXZ");
-    ref.current.rotation.y = damp(
+    ref.current.rotation.y = MathUtils.damp(
       ref.current.rotation.y,
       eulerHelper.y,
       10,
       dt
     );
   });
+
   const height = useMemo(() => new Signal(450), []);
   const width = useMemo(() => new Signal(500), []);
-  const intialMaxHeight = useRef<number>(undefined);
-  const intialWidth = useRef<number>(undefined);
+  const intialMaxHeight = useRef<number>(450);
+  const intialWidth = useRef<number>(500);
   const containerRef = useRef<ComponentInternals>(null);
   const handleRef = useMemo(
     () =>
@@ -87,168 +85,170 @@ export default function NodePanel({
   );
   const innerTarget = useRef<Group>(null);
 
+  const handleDelete = () => {
+    console.log("deleting node", node.id);
+    deleteNode(node.id);
+  };
+
+  const handleExpand = () => {
+    setIsExpanded(!isExpanded);
+    if (!isExpanded) {
+      height.value = 700; // Max height
+      width.value = 800; // Max width
+    } else {
+      height.value = 450; // Reset to initial height
+      width.value = 500; // Reset to initial width
+    }
+  };
+
   return (
     <group position={position}>
       <HandleTarget>
         <group ref={ref} pointerEventsType={{ deny: "grab" }}>
           <group ref={innerTarget}>
-            <DefaultProperties borderColor={colors.background}>
-              <Defaults>
-                <Root
-                  anchorY="bottom"
-                  width={width}
-                  height={height}
+            <Root
+              anchorY="bottom"
+              width={width}
+              height={height}
+              alignItems="center"
+              flexDirection="column"
+              pixelSize={0.0015}
+            >
+              <Handle
+                translate="as-scale"
+                targetRef={innerTarget}
+                apply={(state) => {
+                  if (state.first) {
+                    intialMaxHeight.current = height.value;
+                    intialWidth.current = width.value;
+                  } else if (
+                    intialMaxHeight.current != null &&
+                    intialWidth.current != null
+                  ) {
+                    height.value = MathUtils.clamp(
+                      state.current.scale.y * intialMaxHeight.current,
+                      250,
+                      700
+                    );
+                    width.value = MathUtils.clamp(
+                      state.current.scale.x * intialWidth.current,
+                      400,
+                      800
+                    );
+                  }
+                }}
+                handleRef={handleRef}
+                rotate={false}
+                multitouch={false}
+                scale={{ z: false }}
+              >
+                <Container
+                  pointerEventsType={{ deny: "touch" }}
+                  ref={containerRef}
+                  positionType="absolute"
+                  positionTop={-26}
+                  width={26}
+                  height={26}
+                  backgroundColor={colors.background}
+                  borderRadius={100}
+                  positionRight={-26}
+                  panelMaterialClass={GlassMaterial}
+                  borderBend={0.4}
+                  borderWidth={4}
+                ></Container>
+              </Handle>
+
+              <Card
+                hover={{ borderColor: "rgb(94,6,65)" }}
+                dark={{
+                  borderColor: "rgb(63,6,45)",
+                  backgroundColor: "rgb(30,5,22)",
+                }}
+                width="100%"
+                flexGrow={1}
+                borderWidth={4}
+                borderColor="rgb(221,221,221)"
+                backgroundColor="rgb(255,255,255)"
+                display="flex"
+                flexDirection="column"
+              >
+                <CardHeader
+                  display="flex"
+                  flexDirection="row"
                   alignItems="center"
-                  flexDirection="column"
-                  pixelSize={0.0015}
+                  justifyContent="space-between"
+                  padding={2}
+                  borderBottomWidth={1}
+                  flexShrink={0}
                 >
-                  <Handle
-                    translate="as-scale"
-                    targetRef={innerTarget}
-                    apply={(state) => {
-                      if (state.first) {
-                        intialMaxHeight.current = height.value;
-                        intialWidth.current = width.value;
-                      } else if (
-                        intialMaxHeight.current != null &&
-                        intialWidth.current != null
-                      ) {
-                        height.value = clamp(
-                          state.current.scale.y * intialMaxHeight.current,
-                          250,
-                          700
-                        );
-                        width.value = clamp(
-                          state.current.scale.x * intialWidth.current,
-                          400,
-                          800
-                        );
-                      }
-                    }}
-                    handleRef={handleRef}
-                    rotate={false}
-                    multitouch={false}
-                    scale={{ z: false }}
-                  >
+                  <Container display="flex" alignItems="center">
+                    {node.type === "text" ? (
+                      <TypeIcon marginLeft={8} marginRight={8} />
+                    ) : (
+                      <FileIcon marginLeft={8} marginRight={8} />
+                    )}
                     <Container
-                      pointerEventsType={{ deny: "touch" }}
-                      ref={containerRef}
-                      positionType="absolute"
-                      positionTop={-26}
-                      width={26}
-                      height={26}
-                      backgroundColor={colors.background}
-                      borderRadius={100}
-                      positionRight={-26}
-                      panelMaterialClass={GlassMaterial}
-                      borderBend={0.4}
-                      borderWidth={4}
+                      dark={{ backgroundColor: "rgb(63,6,45)" }}
+                      height={24}
+                      width={1}
+                      backgroundColor="rgb(221,221,221)"
+                      marginLeft={2}
+                      marginRight={2}
+                      flexDirection="column"
                     ></Container>
-                  </Handle>
-                  <Container
-                    alignItems="center"
-                    flexGrow={1}
-                    width="100%"
-                    flexDirection="column-reverse"
-                    gapRow={8}
-                  >
                     <Container
                       display="flex"
                       alignItems="center"
-                      flexShrink={0}
-                      paddingLeft={16}
-                      paddingRight={16}
-                      paddingTop={4}
-                      paddingBottom={4}
-                      backgroundColor={colors.background}
-                      borderRadius={16}
-                      panelMaterialClass={GlassMaterial}
-                      borderBend={0.4}
-                      borderWidth={4}
-                      flexDirection="row"
-                      gapColumn={16}
-                      width="100%"
-                      zIndexOffset={10}
-                      transformTranslateZ={10}
-                      marginTop={-30}
-                      maxWidth={350}
+                      marginLeft={8}
+                      gap={8}
+                      maxWidth={200}
                     >
                       <Text
                         fontSize={14}
+                        lineHeight={20}
                         fontWeight={500}
-                        lineHeight={28}
-                        color="rgb(0,0,0)"
+                        color="rgb(63,6,45)"
                         dark={{ color: "rgb(255,255,255)" }}
                         flexDirection="column"
                       >
-                        {node.label || node.type}
+                        {node.label}
                       </Text>
-                      <Container flexGrow={1} />
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => {
-                          height.value = 450;
-                          width.value = 500;
-                        }}
-                      >
-                        <ExpandIcon
-                          width={16}
-                          color="rgb(17,24,39)"
-                          dark={{ color: "rgb(243,244,246)" }}
-                        />
-                      </Button>
-                    </Container>
-                    <Container
-                      flexGrow={1}
-                      scrollbarBorderRadius={4}
-                      scrollbarOpacity={0.2}
-                      flexDirection="column"
-                      overflow="scroll"
-                      panelMaterialClass={GlassMaterial}
-                      borderBend={0.4}
-                      backgroundColor={colors.background}
-                      borderRadius={16}
-                      borderWidth={4}
-                      borderColor={colors.background}
-                      width="100%"
-                      hover={{
-                        borderColor: colors.accent,
-                      }}
-                    >
-                      <Container
-                        flexShrink={0}
-                        display="flex"
-                        flexDirection="column"
-                        gapRow={16}
-                        padding={32}
-                        width="100%"
-                      >
-                        <Text
-                          fontSize={16}
-                          lineHeight={24}
-                          color="rgb(0,0,0)"
-                          dark={{ color: "rgb(255,255,255)" }}
-                          width="100%"
-                          fontWeight={400}
-                          letterSpacing={0.5}
-                        >
-                          {node.vrText}
-                        </Text>
-                      </Container>
                     </Container>
                   </Container>
-                  <BarHandle ref={storeRef} />
-                </Root>
-              </Defaults>
-            </DefaultProperties>
+                  <Container display="flex" alignItems="center">
+                    <Button variant="ghost" size="icon" onClick={handleExpand}>
+                      <MaximizeIcon height={16} width={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={handleDelete}>
+                      <Trash2Icon
+                        height={16}
+                        width={16}
+                        hover={{ color: "rgb(180,14,122)" }}
+                      />
+                    </Button>
+                  </Container>
+                </CardHeader>
+                <CardContent
+                  padding={16}
+                  flexGrow={1}
+                  alignItems="flex-start"
+                  overflow="scroll"
+                  scrollbarOpacity={0.2}
+                  scrollbarBorderRadius={4}
+                >
+                  <Text paddingTop={16} flexDirection="column">
+                    {node.vrText}
+                  </Text>
+                </CardContent>
+              </Card>
+              <BarHandle ref={storeRef} />
+            </Root>
           </group>
         </group>
       </HandleTarget>
     </group>
   );
 }
-
 const BarHandle = forwardRef<HandleStore<any>, {}>((props, ref) => {
   const containerRef = useRef<ComponentInternals>(null);
   const handleRef = useMemo(

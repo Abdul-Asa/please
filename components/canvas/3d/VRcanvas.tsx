@@ -3,18 +3,20 @@ import { SoftShadows, Sky, CameraControls } from "@react-three/drei";
 import {
   XR,
   createXRStore,
-  IfInSessionMode,
   useXR,
   XROrigin,
   noEvents,
   PointerEvents,
+  IfInSessionMode,
 } from "@react-three/xr";
 import { Canvas } from "@react-three/fiber";
+import { OrbitHandles } from "@react-three/handle";
 import { useCanvas } from "../useCanvas";
 import { Model as Room, Light, Sphere } from "./assets/room";
-import NodePanel from "./assets/panel";
-import { Node } from "../types";
 import { useTheme } from "next-themes";
+import { Node } from "../types";
+import NodePanel from "./assets/panel";
+
 const xrStore = createXRStore({
   foveation: 0,
   emulate: { syntheticEnvironment: false },
@@ -24,23 +26,24 @@ function NonAREnvironment() {
   const inAR = useXR((s) => s.mode === "immersive-ar");
   const { theme } = useTheme();
   if (inAR) return null;
-  return (
-    <>
-      <SoftShadows />
-      <IfInSessionMode deny={["immersive-vr", "immersive-ar"]}>
-        <CameraControls makeDefault />
-      </IfInSessionMode>
-      <color attach="background" args={["#d0d0d0"]} />
-      <fog attach="fog" args={["#d0d0d0", 8, 35]} />
-      <ambientLight intensity={theme === "light" ? 0.1 : 0.4} />
-      <Light />
-      <Room scale={0.5} position={[0, -1, 0]} />
-      <Sphere />
-      <Sphere position={[2, 4, -8]} scale={0.9} />
-      <Sphere position={[-2, 2, -8]} scale={0.8} />
-      <Sky inclination={0.52} />
-    </>
-  );
+  else
+    return (
+      <>
+        <SoftShadows />
+        <IfInSessionMode deny={["immersive-vr", "immersive-ar"]}>
+          <CameraControls makeDefault />
+        </IfInSessionMode>
+        <color attach="background" args={["#d0d0d0"]} />
+        <fog attach="fog" args={["#d0d0d0", 8, 35]} />
+        <ambientLight intensity={theme === "dark" ? 0.1 : 0.4} />
+        <Light />
+        <Room scale={0.5} position={[0, -1.5, 0]} />
+        <Sphere />
+        <Sphere position={[2, 4, -8]} scale={0.9} />
+        <Sphere position={[-2, 2, -8]} scale={0.8} />
+        <Sky inclination={0.52} />
+      </>
+    );
 }
 
 export default function VRCanvas() {
@@ -66,26 +69,19 @@ export default function VRCanvas() {
   };
 
   const positions = calculateArcPositions(nodes);
-
   return (
     <>
       <Canvas
-        shadows
-        // camera={{ position: [5, 2, 10], fov: 50 }}
-        style={{
-          position: "fixed",
-          width: "100%",
-          height: "100%",
-          flexGrow: 1,
-        }}
-        gl={{ localClippingEnabled: true }}
         events={noEvents}
+        gl={{ localClippingEnabled: true }}
+        style={{ width: "100dvw", height: "100dvh", flexGrow: 1 }}
+        camera={{ position: [0, 0, 0.65] }}
       >
         <PointerEvents batchEvents={false} />
-        {/* <OrbitHandles /> */}
+        <OrbitHandles />
         <XR store={xrStore}>
           <NonAREnvironment />
-          <XROrigin position={[0, 0, 0]} />
+          <XROrigin position-y={-0.5} position-z={0.5} />
           {nodes.map((node, index) => (
             <NodePanel key={node.id} node={node} position={positions[index]} />
           ))}
@@ -93,18 +89,28 @@ export default function VRCanvas() {
       </Canvas>
       <div
         style={{
-          position: "fixed",
           display: "flex",
-          width: "100vw",
-          height: "100vh",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          alignItems: "center",
-          color: "white",
-          pointerEvents: "none",
+          flexDirection: "row",
+          gap: "1rem",
+          position: "absolute",
+          zIndex: 10000,
+          bottom: "1rem",
+          left: "50%",
+          transform: "translate(-50%, 0)",
         }}
       >
         <button
+          style={{
+            background: "white",
+            borderRadius: "0.5rem",
+            border: "none",
+            fontWeight: "bold",
+            color: "black",
+            padding: "1rem 2rem",
+            cursor: "pointer",
+            fontSize: "1.5rem",
+            boxShadow: "0px 0px 20px rgba(0,0,0,1)",
+          }}
           onClick={async () => {
             await xrStore.getState().session?.end();
             updateViewport({ is3D: "AR" });
@@ -117,26 +123,21 @@ export default function VRCanvas() {
                 alert("Error entering AR:" + error);
               });
           }}
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            left: "20%",
-            transform: "translateX(-50%)",
-            fontSize: "20px",
-            background: "black",
-            borderRadius: "0.5rem",
-            border: "none",
-            fontWeight: "bold",
-            color: "white",
-            padding: "1rem 2rem",
-            cursor: "pointer",
-            boxShadow: "0px 0px 20px rgba(0,0,0,1)",
-            pointerEvents: "auto",
-          }}
         >
           Enter AR
         </button>
         <button
+          style={{
+            background: "white",
+            borderRadius: "0.5rem",
+            border: "none",
+            fontWeight: "bold",
+            color: "black",
+            padding: "1rem 2rem",
+            cursor: "pointer",
+            fontSize: "1.5rem",
+            boxShadow: "0px 0px 20px rgba(0,0,0,1)",
+          }}
           onClick={async () => {
             await xrStore.getState().session?.end();
             updateViewport({ is3D: "VR" });
@@ -149,48 +150,27 @@ export default function VRCanvas() {
                 alert("Error entering VR:" + error);
               });
           }}
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            fontSize: "20px",
-            background: "black",
-            borderRadius: "0.5rem",
-            border: "none",
-            fontWeight: "bold",
-            color: "white",
-            padding: "1rem 2rem",
-            cursor: "pointer",
-            boxShadow: "0px 0px 20px rgba(0,0,0,1)",
-            pointerEvents: "auto",
-          }}
         >
           Enter VR
         </button>
         <button
+          style={{
+            background: "white",
+            borderRadius: "0.5rem",
+            border: "none",
+            fontWeight: "bold",
+            color: "black",
+            padding: "1rem 2rem",
+            cursor: "pointer",
+            fontSize: "1.5rem",
+            boxShadow: "0px 0px 20px rgba(0,0,0,1)",
+          }}
           onClick={() => {
             updateViewport({ is3D: null });
             xrStore.getState().session?.end();
           }}
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            left: "80%",
-            transform: "translateX(-50%)",
-            fontSize: "20px",
-            background: "black",
-            borderRadius: "0.5rem",
-            border: "none",
-            fontWeight: "bold",
-            color: "white",
-            padding: "1rem 2rem",
-            cursor: "pointer",
-            boxShadow: "0px 0px 20px rgba(0,0,0,1)",
-            pointerEvents: "auto",
-          }}
         >
-          Exit 3D
+          Exit
         </button>
       </div>
     </>
