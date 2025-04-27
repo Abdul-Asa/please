@@ -9,6 +9,7 @@ import {
   Trash2Icon,
   ImageIcon,
   MaximizeIcon,
+  BoxIcon,
 } from "lucide-react";
 import { Button } from "../../ui/button";
 import { motion } from "motion/react";
@@ -158,6 +159,21 @@ function CanvasNode({ node }: { node: Node }) {
               {node.label || node.type}
             </span>
           </div>
+          <Button
+            size={"icon"}
+            variant={"ghost"}
+            className={cn((!viewport.vrFrom || isPanMode) && "invisible")}
+            onClick={() => {
+              updateViewport({
+                is3D: viewport.vrFrom,
+                expandedNodeId: node.id,
+                vrFrom: null,
+              });
+            }}
+            tooltip="Return back to VR"
+          >
+            <BoxIcon className="animate-bounce" />
+          </Button>
         </motion.div>
         <motion.div
           layoutId={`${node.id}-controls`}
@@ -186,7 +202,7 @@ function CanvasNode({ node }: { node: Node }) {
                 updateViewport({ expandedNodeId: node.id });
               }
             }}
-            title="Expand node"
+            tooltip="Expand node"
           >
             <MaximizeIcon />
           </Button>
@@ -198,7 +214,7 @@ function CanvasNode({ node }: { node: Node }) {
               isPanMode && "invisible"
             )}
             onClick={handleDelete}
-            title="Delete node"
+            tooltip="Delete node"
           >
             <Trash2Icon />
           </Button>

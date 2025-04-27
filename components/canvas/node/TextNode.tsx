@@ -1,6 +1,7 @@
 import { TextNode } from "../types";
 import { useCanvas } from "../useCanvas";
 import { Editor } from "../text-editor";
+import { JSONContent } from "@tiptap/react";
 
 export function TextNodeContent({ node }: { node: TextNode }) {
   const { controls } = useCanvas();
@@ -10,7 +11,7 @@ export function TextNodeContent({ node }: { node: TextNode }) {
     text,
   }: {
     content: string;
-    text: string;
+    text: JSONContent;
   }) => {
     controls.updateNode(node.id, {
       text: content,

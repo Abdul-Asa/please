@@ -19,6 +19,7 @@ import {
   Trash2Icon,
   TypeIcon,
   FileIcon,
+  PencilIcon,
 } from "@react-three/uikit-lucide";
 import { Handle, HandleStore, HandleTarget } from "@react-three/handle";
 import { forwardRef, RefObject, useMemo, useRef, useState } from "react";
@@ -28,6 +29,9 @@ import { Signal } from "@preact/signals";
 import { useTheme } from "next-themes";
 import { useCanvas } from "../../useCanvas";
 import { Node } from "../../types";
+import { JSONContent } from "@tiptap/react";
+import { useXR } from "@react-three/xr";
+import { xrStore } from "../VRcanvas";
 
 const eulerHelper = new Euler();
 const quaternionHelper = new Quaternion();
@@ -47,7 +51,8 @@ export default function NodePanel({
   const [isExpanded, setIsExpanded] = useState(false);
   const { theme } = useTheme();
   const {
-    controls: { deleteNode },
+    canvas: { viewport },
+    controls: { deleteNode, updateViewport },
   } = useCanvas();
   setPreferredColorScheme(theme as PreferredColorScheme);
 
@@ -99,6 +104,16 @@ export default function NodePanel({
       height.value = 450; // Reset to initial height
       width.value = 500; // Reset to initial width
     }
+  };
+
+  const handleEdit = async () => {
+    console.log("editing node", node.id);
+    await xrStore.getState().session?.end();
+    updateViewport({
+      vrFrom: viewport.is3D,
+      is3D: null,
+      expandedNodeId: node.id,
+    });
   };
 
   return (
@@ -216,6 +231,9 @@ export default function NodePanel({
                     </Container>
                   </Container>
                   <Container display="flex" alignItems="center">
+                    <Button variant="ghost" size="icon" onClick={handleEdit}>
+                      <PencilIcon height={16} width={16} />
+                    </Button>
                     <Button variant="ghost" size="icon" onClick={handleExpand}>
                       <MaximizeIcon height={16} width={16} />
                     </Button>
@@ -236,9 +254,9 @@ export default function NodePanel({
                   scrollbarOpacity={0.2}
                   scrollbarBorderRadius={4}
                 >
-                  <Text paddingTop={16} flexDirection="column">
-                    {node.vrText}
-                  </Text>
+                  <Container paddingTop={4} flexDirection="column">
+                    {convertVrJsonToUIKit(node.vrText || {})}
+                  </Container>
                 </CardContent>
               </Card>
               <BarHandle ref={storeRef} />
@@ -295,3 +313,68 @@ const BarHandle = forwardRef<HandleStore<any>, {}>((props, ref) => {
     </Handle>
   );
 });
+
+export function convertVrJsonToUIKit(json: JSONContent) {
+  if (!json || !json.content) return null;
+
+  return json.content.map((paragraph, pIdx) => {
+    if (paragraph.type !== "paragraph") return null;
+
+    return (
+      <Container
+        key={pIdx}
+        flexDirection="row"
+        flexWrap="wrap" // <--- important!
+        alignItems="flex-end"
+        gap={4}
+        paddingTop={8}
+      >
+        {paragraph.content?.map((node, nodeIdx) => {
+          if (node.type === "hardBreak") {
+            // Add a full-width empty block to simulate a line break
+            return (
+              <Container
+                key={`break-${nodeIdx}`}
+                width="100%"
+                height={8} // adjust space between lines
+              />
+            );
+          }
+
+          if (node.type === "text") {
+            const isBold = node.marks?.some((mark) => mark.type === "bold");
+            const themeMark = node.marks?.find(
+              (mark) => mark.type === "themeMark"
+            );
+            const themeColor = themeMark?.attrs?.color?.[0] || "transparent";
+
+            return (
+              <Container
+                key={nodeIdx}
+                flexDirection="column"
+                alignItems="center"
+              >
+                <Text
+                  fontSize={14}
+                  fontWeight={isBold ? 700 : 400}
+                  lineHeight={20}
+                >
+                  {node.text}
+                </Text>
+                <Container
+                  width="100%"
+                  height={2}
+                  backgroundColor={themeMark ? themeColor : "transparent"}
+                  borderRadius={1}
+                  panelMaterialClass={themeMark ? undefined : GlassMaterial}
+                />
+              </Container>
+            );
+          }
+
+          return null;
+        })}
+      </Container>
+    );
+  });
+}

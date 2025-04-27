@@ -19,6 +19,7 @@ export const NODE_CONSTANTS = {
 
 export const defaultViewport: Viewport = {
   is3D: null,
+  vrFrom: null,
   scale: 1,
   panOffsetX: 0,
   panOffsetY: 0,

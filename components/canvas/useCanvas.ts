@@ -435,7 +435,12 @@ export function useCanvas() {
       y: position.y,
       width: NODE_CONSTANTS.TEXT_NODE_WIDTH,
       height: NODE_CONSTANTS.NODE_HEIGHT,
-      vrText: "New text",
+      vrText: {
+        type: "doc",
+        content: [
+          { type: "paragraph", content: [{ type: "text", text: "New text" }] },
+        ],
+      },
     };
 
     setNodes((prev) => [...prev, newNode]);
@@ -484,7 +489,7 @@ export function useCanvas() {
       width: NODE_CONSTANTS.FILE_NODE_WIDTH,
       height: NODE_CONSTANTS.NODE_HEIGHT,
       fileType: fileType,
-      vrText: content,
+      vrText: {},
     };
 
     setNodes((prev) => [...prev, newNode]);

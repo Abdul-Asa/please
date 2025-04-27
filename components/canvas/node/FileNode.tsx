@@ -4,6 +4,7 @@ import { useCanvas } from "../useCanvas";
 import { FileTextIcon } from "lucide-react";
 import { getFileContent, storeFileContent } from "../store";
 import { Editor } from "../text-editor";
+import { JSONContent } from "@tiptap/react";
 
 export function FileNodeContent({ node }: { node: FileNode }) {
   const {
@@ -34,7 +35,7 @@ export function FileNodeContent({ node }: { node: FileNode }) {
     text,
   }: {
     content: string;
-    text: string;
+    text: JSONContent;
   }) => {
     if (fileContent?.type === "text") {
       setFileContent({

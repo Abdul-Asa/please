@@ -1,7 +1,12 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import { EditorContent, type Extension, useEditor } from "@tiptap/react";
+import {
+  EditorContent,
+  type Extension,
+  useEditor,
+  JSONContent,
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -78,7 +83,13 @@ const extensions = [
 
 interface EditorProps {
   content?: string;
-  onChange?: ({ content, text }: { content: string; text: string }) => void;
+  onChange?: ({
+    content,
+    text,
+  }: {
+    content: string;
+    text: JSONContent;
+  }) => void;
   className?: string;
   nodeId: string;
 }
@@ -101,7 +112,7 @@ const Editor = ({ content, onChange, className, nodeId }: EditorProps) => {
     onUpdate: ({ editor }) => {
       onChange?.({
         content: editor.getHTML(),
-        text: editor.getText(),
+        text: editor.getJSON(),
       });
       setIsEditable(editor.isEditable);
     },

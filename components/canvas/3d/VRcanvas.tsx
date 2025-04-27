@@ -1,5 +1,12 @@
 "use client";
-import { SoftShadows, Sky, CameraControls } from "@react-three/drei";
+import {
+  SoftShadows,
+  Sky,
+  CameraControls,
+  Environment,
+  ContactShadows,
+  OrbitControls,
+} from "@react-three/drei";
 import {
   XR,
   createXRStore,
@@ -17,7 +24,7 @@ import { useTheme } from "next-themes";
 import { Node } from "../types";
 import NodePanel from "./assets/panel";
 
-const xrStore = createXRStore({
+export const xrStore = createXRStore({
   foveation: 0,
   emulate: { syntheticEnvironment: false },
 });
@@ -29,10 +36,10 @@ function NonAREnvironment() {
   else
     return (
       <>
-        <SoftShadows />
         <IfInSessionMode deny={["immersive-vr", "immersive-ar"]}>
           <CameraControls makeDefault />
         </IfInSessionMode>
+        {/* <SoftShadows />
         <color attach="background" args={["#d0d0d0"]} />
         <fog attach="fog" args={["#d0d0d0", 8, 35]} />
         <ambientLight intensity={theme === "dark" ? 0.1 : 0.4} />
@@ -41,7 +48,15 @@ function NonAREnvironment() {
         <Sphere />
         <Sphere position={[2, 4, -8]} scale={0.9} />
         <Sphere position={[-2, 2, -8]} scale={0.8} />
-        <Sky inclination={0.52} />
+        <Sky inclination={0.52} /> */}
+        <hemisphereLight groundColor="red" />
+        <Environment background preset="dawn" blur={0.8} />
+        <ContactShadows
+          position={[0, -9, 0]}
+          opacity={0.7}
+          scale={40}
+          blur={1}
+        />
       </>
     );
 }
@@ -78,7 +93,7 @@ export default function VRCanvas() {
         camera={{ position: [0, 0, 0.65] }}
       >
         <PointerEvents batchEvents={false} />
-        <OrbitHandles />
+        {/* <OrbitHandles /> */}
         <XR store={xrStore}>
           <NonAREnvironment />
           <XROrigin position-y={-0.5} position-z={0.5} />

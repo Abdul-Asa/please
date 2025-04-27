@@ -1,4 +1,4 @@
-import { Editor } from "@tiptap/react";
+import { Editor, JSONContent } from "@tiptap/react";
 
 export type NodeType = "text" | "file";
 export type FileType = "image" | "pdf" | "text";
@@ -12,7 +12,7 @@ interface BaseNode {
   height: number;
   label?: string;
   editor?: Editor;
-  vrText?: string;
+  vrText?: JSONContent;
 }
 
 export interface TextNode extends BaseNode {
@@ -42,6 +42,7 @@ export interface Viewport {
   lastSelectedNodeId: string;
   expandedNodeId: string;
   panMode: boolean;
+  vrFrom: "VR" | "AR" | "3D" | null;
   dragState: {
     startX: number;
     startY: number;
