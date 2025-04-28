@@ -20,6 +20,11 @@ import {
   TypeIcon,
   FileIcon,
   PencilIcon,
+  Sun,
+  Moon,
+  X,
+  Building2,
+  Rocket,
 } from "@react-three/uikit-lucide";
 import { Handle, HandleStore, HandleTarget } from "@react-three/handle";
 import { forwardRef, RefObject, useMemo, useRef, useState } from "react";
@@ -346,6 +351,7 @@ export function convertVrJsonToUIKit(json: JSONContent) {
             const themeMark = node.marks?.find(
               (mark) => mark.type === "themeMark"
             );
+            const hasMultipleColors = themeMark?.attrs?.color?.length > 1;
             const themeColor = themeMark?.attrs?.color?.[0] || "transparent";
 
             return (
@@ -353,6 +359,7 @@ export function convertVrJsonToUIKit(json: JSONContent) {
                 key={nodeIdx}
                 flexDirection="column"
                 alignItems="center"
+                positionType="relative" // <-- very important!
               >
                 <Text
                   fontSize={14}
@@ -361,13 +368,39 @@ export function convertVrJsonToUIKit(json: JSONContent) {
                 >
                   {node.text}
                 </Text>
-                <Container
-                  width="100%"
-                  height={2}
-                  backgroundColor={themeMark ? themeColor : "transparent"}
-                  borderRadius={1}
-                  panelMaterialClass={themeMark ? undefined : GlassMaterial}
-                />
+
+                {/* Underline - absolutely positioned */}
+                {themeMark ? (
+                  <Container
+                    positionType="absolute"
+                    positionBottom={0}
+                    width="100%"
+                    flexDirection="row"
+                    height={2}
+                  >
+                    {themeMark.attrs?.color?.map(
+                      (color: string, index: number) => (
+                        <Container
+                          key={index}
+                          width={`${100 / (themeMark.attrs?.color.length || 1)}%`}
+                          height="100%"
+                          backgroundColor={color}
+                          borderRadius={1}
+                        />
+                      )
+                    )}
+                  </Container>
+                ) : (
+                  <Container
+                    positionType="absolute"
+                    positionBottom={0}
+                    width="100%"
+                    height={2}
+                    backgroundColor="transparent"
+                    borderRadius={1}
+                    panelMaterialClass={GlassMaterial}
+                  />
+                )}
               </Container>
             );
           }
@@ -377,4 +410,113 @@ export function convertVrJsonToUIKit(json: JSONContent) {
       </Container>
     );
   });
+}
+
+export function Toolbar({ position }: { position: [number, number, number] }) {
+  const { theme, setTheme } = useTheme();
+  const {
+    controls,
+    canvas: { viewport },
+  } = useCanvas();
+  const { updateViewport } = controls;
+  const inAR = useXR((s) => s.mode === "immersive-ar");
+
+  const handleExit = async () => {
+    await xrStore.getState().session?.end();
+    updateViewport({ is3D: null });
+  };
+
+  const handleThemeToggle = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const handleEnvironmentToggle = () => {
+    updateViewport({
+      vrEnvironment: viewport.vrEnvironment === "space" ? "room" : "space",
+    });
+  };
+
+  const ref = useRef<Group>(null);
+  const innerTarget = useRef<Group>(null);
+  const storeRef = useRef<HandleStore<any>>(null);
+
+  useFrame((state, dt) => {
+    if (ref.current == null || storeRef.current?.getState() == null) {
+      return;
+    }
+    state.camera.getWorldPosition(vectorHelper1);
+    ref.current.getWorldPosition(vectorHelper2);
+    quaternionHelper.setFromUnitVectors(
+      zAxis,
+      vectorHelper1.sub(vectorHelper2).normalize()
+    );
+    eulerHelper.setFromQuaternion(quaternionHelper, "YXZ");
+    ref.current.rotation.y = MathUtils.damp(
+      ref.current.rotation.y,
+      eulerHelper.y,
+      10,
+      dt
+    );
+  });
+
+  return (
+    <group position={position}>
+      <HandleTarget>
+        <group ref={ref} pointerEventsType={{ deny: "grab" }}>
+          <group ref={innerTarget}>
+            <Root
+              anchorY="bottom"
+              width={250}
+              height={60}
+              alignItems="center"
+              flexDirection="column"
+              pixelSize={0.0015}
+            >
+              <Card
+                hover={{ borderColor: "rgb(94,6,65)" }}
+                dark={{
+                  borderColor: "rgb(63,6,45)",
+                  backgroundColor: "rgb(30,5,22)",
+                }}
+                width="100%"
+                height="100%"
+                borderWidth={4}
+                borderColor="rgb(221,221,221)"
+                backgroundColor="rgb(255,255,255)"
+                display="flex"
+                flexDirection="row"
+                alignItems="center"
+                justifyContent="space-around"
+                gap={8}
+                padding={8}
+              >
+                <Button variant="ghost" size="icon" onClick={handleThemeToggle}>
+                  {theme === "dark" ? (
+                    <Sun height={16} width={16} />
+                  ) : (
+                    <Moon height={16} width={16} />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleEnvironmentToggle}
+                >
+                  {viewport.vrEnvironment === "room" ? (
+                    <Rocket height={16} width={16} />
+                  ) : (
+                    <Building2 height={16} width={16} />
+                  )}
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleExit}>
+                  <X height={16} width={16} />
+                </Button>
+              </Card>
+              <BarHandle ref={storeRef} />
+            </Root>
+          </group>
+        </group>
+      </HandleTarget>
+    </group>
+  );
 }

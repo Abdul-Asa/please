@@ -5,7 +5,6 @@ import {
   CameraControls,
   Environment,
   ContactShadows,
-  OrbitControls,
 } from "@react-three/drei";
 import {
   XR,
@@ -17,21 +16,19 @@ import {
   IfInSessionMode,
 } from "@react-three/xr";
 import { Canvas } from "@react-three/fiber";
-import { OrbitHandles } from "@react-three/handle";
 import { useCanvas } from "../useCanvas";
 import { Model as Room, Light, Sphere } from "./assets/room";
 import { useTheme } from "next-themes";
 import { Node } from "../types";
-import NodePanel from "./assets/panel";
+import NodePanel, { Toolbar } from "./assets/panel";
 
 export const xrStore = createXRStore({
   foveation: 0,
   emulate: { syntheticEnvironment: false },
 });
 
-function NonAREnvironment() {
+function NonAREnvironment({ environment }: { environment: "room" | "space" }) {
   const inAR = useXR((s) => s.mode === "immersive-ar");
-  const { theme } = useTheme();
   if (inAR) return null;
   else
     return (
@@ -39,32 +36,43 @@ function NonAREnvironment() {
         <IfInSessionMode deny={["immersive-vr", "immersive-ar"]}>
           <CameraControls makeDefault />
         </IfInSessionMode>
-        {/* <SoftShadows />
-        <color attach="background" args={["#d0d0d0"]} />
-        <fog attach="fog" args={["#d0d0d0", 8, 35]} />
-        <ambientLight intensity={theme === "dark" ? 0.1 : 0.4} />
-        <Light />
-        <Room scale={0.5} position={[0, -1.5, 0]} />
-        <Sphere />
-        <Sphere position={[2, 4, -8]} scale={0.9} />
-        <Sphere position={[-2, 2, -8]} scale={0.8} />
-        <Sky inclination={0.52} /> */}
-        <hemisphereLight groundColor="red" />
-        <Environment background preset="dawn" blur={0.8} />
-        <ContactShadows
-          position={[0, -9, 0]}
-          opacity={0.7}
-          scale={40}
-          blur={1}
-        />
+        {environment === "room" ? <Env1 /> : <Env2 />}
       </>
     );
+}
+
+function Env1() {
+  const { theme } = useTheme();
+  return (
+    <>
+      <SoftShadows />
+      <color attach="background" args={["#d0d0d0"]} />
+      <fog attach="fog" args={["#d0d0d0", 8, 35]} />
+      <ambientLight intensity={theme === "dark" ? 0.1 : 0.4} />
+      <Light />
+      <Room scale={0.5} position={[0, -1.5, 0]} />
+      <Sphere />
+      <Sphere position={[2, 4, -8]} scale={0.9} />
+      <Sphere position={[-2, 2, -8]} scale={0.8} />
+      <Sky inclination={0.52} />
+    </>
+  );
+}
+
+function Env2() {
+  return (
+    <>
+      <hemisphereLight groundColor="red" />
+      <Environment background preset="dawn" blur={0.8} />
+      <ContactShadows position={[0, -9, 0]} opacity={0.7} scale={40} blur={1} />
+    </>
+  );
 }
 
 export default function VRCanvas() {
   const { controls, canvas } = useCanvas();
   const { updateViewport } = controls;
-  const { nodes } = canvas;
+  const { nodes, viewport } = canvas;
 
   const calculateArcPositions = (nodes: Node[]) => {
     const maxWidth = 3;
@@ -95,11 +103,12 @@ export default function VRCanvas() {
         <PointerEvents batchEvents={false} />
         {/* <OrbitHandles /> */}
         <XR store={xrStore}>
-          <NonAREnvironment />
+          <NonAREnvironment environment={viewport.vrEnvironment} />
           <XROrigin position-y={-0.5} position-z={0.5} />
           {nodes.map((node, index) => (
             <NodePanel key={node.id} node={node} position={positions[index]} />
           ))}
+          <Toolbar position={[0, -0.8, -0.6]} />
         </XR>
       </Canvas>
       <div

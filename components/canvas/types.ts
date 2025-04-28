@@ -43,6 +43,7 @@ export interface Viewport {
   expandedNodeId: string;
   panMode: boolean;
   vrFrom: "VR" | "AR" | "3D" | null;
+  vrEnvironment: "room" | "space";
   dragState: {
     startX: number;
     startY: number;
