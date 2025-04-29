@@ -36,7 +36,7 @@ function NonAREnvironment({ environment }: { environment: "room" | "space" }) {
         <IfInSessionMode deny={["immersive-vr", "immersive-ar"]}>
           <CameraControls makeDefault />
         </IfInSessionMode>
-        {environment === "room" ? <Env1 /> : <Env2 />}
+        {environment === "room" ? <Env1 /> : <Env2 inAR={inAR} />}
       </>
     );
 }
@@ -59,12 +59,17 @@ function Env1() {
   );
 }
 
-function Env2() {
+function Env2({ inAR }: { inAR: boolean }) {
   return (
     <>
-      <hemisphereLight groundColor="red" />
-      <Environment background preset="dawn" blur={0.8} />
-      <ContactShadows position={[0, -9, 0]} opacity={0.7} scale={40} blur={1} />
+      {/* <hemisphereLight groundColor="red" /> */}
+      <Environment
+        blur={0.1}
+        background={!inAR}
+        environmentIntensity={2}
+        preset="sunset"
+      />
+      {/* <ContactShadows position={[0, -9, 0]} opacity={0.7} scale={40} blur={1} /> */}
     </>
   );
 }
@@ -104,11 +109,11 @@ export default function VRCanvas() {
         {/* <OrbitHandles /> */}
         <XR store={xrStore}>
           <NonAREnvironment environment={viewport.vrEnvironment} />
-          <XROrigin position-z={0.5} />
+          <XROrigin position-y={-0.5} position-z={0.5} />
           {nodes.map((node, index) => (
             <NodePanel key={node.id} node={node} position={positions[index]} />
           ))}
-          <Toolbar position={[0, -0.8, -0.6]} />
+          <Toolbar position={[0, 0, -0.6]} />
         </XR>
       </Canvas>
       <div

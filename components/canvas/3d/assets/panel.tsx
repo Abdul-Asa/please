@@ -368,7 +368,7 @@ export function convertVrJsonToUIKit(json: JSONContent) {
               >
                 <Text
                   fontSize={14}
-                  fontWeight={isBold ? 700 : 400}
+                  fontWeight={isBold ? 700 : 500}
                   lineHeight={20}
                 >
                   {node.text}
