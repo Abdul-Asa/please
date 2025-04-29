@@ -3,10 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Bug, X, Play } from "lucide-react";
 import { useCanvas } from "../useCanvas";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRoom, useStorage } from "@liveblocks/react";
+import { MultiplayerDebug } from "../multiplayer/debug";
 
-export function DebugDialog() {
+export function DebugDialog({ isMultiplayer }: { isMultiplayer?: boolean }) {
   const { canvas, controls } = useCanvas();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -179,34 +181,39 @@ export function DebugDialog() {
                   <Play className="h-4 w-4 mr-2" />
                   Create Demo Project
                 </Button>
+                {isMultiplayer ? (
+                  <MultiplayerDebug />
+                ) : (
+                  <>
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Viewport</h4>
+                      <pre className="text-xs bg-muted p-2 rounded overflow-x-auto select-text">
+                        {JSON.stringify(canvas.viewport, null, 2)}
+                      </pre>
+                    </div>
 
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Viewport</h4>
-                  <pre className="text-xs bg-muted p-2 rounded overflow-x-auto select-text">
-                    {JSON.stringify(canvas.viewport, null, 2)}
-                  </pre>
-                </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Nodes</h4>
+                      <pre className="text-xs bg-muted p-2 rounded overflow-x-auto select-text">
+                        {JSON.stringify(canvas.nodes, null, 2)}
+                      </pre>
+                    </div>
 
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Nodes</h4>
-                  <pre className="text-xs bg-muted p-2 rounded overflow-x-auto select-text">
-                    {JSON.stringify(canvas.nodes, null, 2)}
-                  </pre>
-                </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Codes</h4>
+                      <pre className="text-xs bg-muted p-2 rounded select-text">
+                        {JSON.stringify(canvas.codes, null, 2)}
+                      </pre>
+                    </div>
 
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Codes</h4>
-                  <pre className="text-xs bg-muted p-2 rounded select-text">
-                    {JSON.stringify(canvas.codes, null, 2)}
-                  </pre>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Code Groups</h4>
-                  <pre className="text-xs bg-muted p-2 rounded select-text">
-                    {JSON.stringify(canvas.codeGroups, null, 2)}
-                  </pre>
-                </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Code Groups</h4>
+                      <pre className="text-xs bg-muted p-2 rounded select-text">
+                        {JSON.stringify(canvas.codeGroups, null, 2)}
+                      </pre>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

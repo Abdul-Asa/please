@@ -4,7 +4,8 @@ import { Editor } from "../text-editor";
 import { JSONContent } from "@tiptap/react";
 
 export function TextNodeContent({ node }: { node: TextNode }) {
-  const { controls } = useCanvas();
+  const { controls, canvas } = useCanvas();
+  const { codes, codeGroups } = canvas;
 
   const handleContentChange = ({
     content,
@@ -24,6 +25,8 @@ export function TextNodeContent({ node }: { node: TextNode }) {
       content={node.text}
       onChange={handleContentChange}
       nodeId={node.id}
+      codes={codes}
+      codeGroups={codeGroups}
     />
   );
 }

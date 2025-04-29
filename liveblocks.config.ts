@@ -1,13 +1,7 @@
 // Define Liveblocks types for your application
 
-import { LiveList, LiveObject, LiveMap } from "@liveblocks/client";
-import {
-  LiveNode,
-  LiveViewport,
-  LiveCode,
-  LiveCodeGroup,
-  LiveFileContent,
-} from "./components/canvas/types";
+import { LiveList } from "@liveblocks/client";
+import { LiveNode, LiveCode, LiveCodeGroup } from "./components/canvas/types";
 
 // https://liveblocks.io/docs/api-reference/liveblocks-react#Typing-your-data
 declare global {
@@ -17,14 +11,14 @@ declare global {
       cursor: { x: number; y: number } | null;
       color: string;
       name: string;
+      isGrabbing: boolean;
+      nodeBeingDragged: string;
     };
     // The Storage tree for the room, for useMutation, useStorage, etc.
     Storage: {
       nodes: LiveList<LiveNode>;
-      viewport: LiveObject<LiveViewport>;
       codes: LiveList<LiveCode>;
       codeGroups: LiveList<LiveCodeGroup>;
-      fileContents: LiveMap<string, LiveFileContent>;
     };
 
     // Custom user info set when authenticating with a secret key

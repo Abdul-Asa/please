@@ -23,6 +23,7 @@ export interface TextNode extends BaseNode {
 export interface FileNode extends BaseNode {
   type: "file";
   file: string;
+  content: string;
   fileType: FileType;
 }
 
@@ -58,14 +59,14 @@ export interface CanvasData {
   viewport?: Viewport;
 }
 
-export interface FileContent {
-  id: string;
-  name: string;
-  type: FileType;
-  content: string | ArrayBuffer;
-  size: number;
-  lastModified: number;
-}
+// export interface FileContent {
+//   id: string;
+//   name: string;
+//   type: FileType;
+//   content: string | ArrayBuffer;
+//   size: number;
+//   lastModified: number;
+// }
 
 export interface CodeSelection {
   nodeId: string;
@@ -92,13 +93,11 @@ export interface CodeGroup {
 
 export type LiveNode = JsonObject & Node;
 
-export type LiveViewport = JsonObject & Viewport;
-
 export type LiveCode = JsonObject & Code;
 
 export type LiveCodeGroup = JsonObject & CodeGroup;
 
-export type LiveFileContent = JsonObject &
-  FileContent & {
-    content: string;
-  };
+// export type LiveFileContent = JsonObject &
+//   FileContent & {
+//     content: string;
+//   };

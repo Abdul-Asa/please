@@ -15,12 +15,15 @@ import { Button } from "../../ui/button";
 import { motion } from "motion/react";
 import { TextNodeContent } from "./TextNode";
 import { FileNodeContent } from "./FileNode";
+import { MultiplayerNodes } from "../multiplayer/nodes";
 
-export function CanvasNodes() {
+export function CanvasNodes({ isMultiplayer }: { isMultiplayer?: boolean }) {
   const { canvas } = useCanvas();
   const { nodes, viewport } = canvas;
 
-  return (
+  return isMultiplayer ? (
+    <MultiplayerNodes />
+  ) : (
     <div
       style={{
         transform: `translate(${viewport.panOffsetX}px, ${viewport.panOffsetY}px) scale(${viewport.scale})`,

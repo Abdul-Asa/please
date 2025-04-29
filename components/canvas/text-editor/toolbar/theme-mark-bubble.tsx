@@ -9,11 +9,10 @@ import type { Code } from "../../types";
 
 interface ThemeMarkBubbleProps {
   editor: Editor;
+  codes: Code[];
 }
 
-export const ThemeMarkBubble = ({ editor }: ThemeMarkBubbleProps) => {
-  const { canvas } = useCanvas();
-  const { codes } = canvas;
+export const ThemeMarkBubble = ({ editor, codes }: ThemeMarkBubbleProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [themeIds, setThemeIds] = useState<string[]>([]);
   const [colors, setColors] = useState<string[]>([]);

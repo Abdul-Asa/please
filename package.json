@@ -56,7 +56,6 @@
     "next": "^14.2.27",
     "next-themes": "^0.4.4",
     "perfect-cursors": "^1.0.5",
-    "random-name": "^0.1.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-pdf": "^9.2.1",
@@ -64,6 +63,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.172.0",
+    "unique-names-generator": "^4.7.1",
     "vaul": "^1.1.2",
     "xlsx": "^0.18.5"
   },

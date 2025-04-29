@@ -41,12 +41,14 @@ export function Canvas({ isMultiplayer }: { isMultiplayer: boolean }) {
             <Loader2 className="h-4 w-4 animate-spin" />
           </div>
         ) : (
-          <CanvasNodes />
+          <CanvasNodes isMultiplayer={isMultiplayer} />
         )}
-        <CanvasSidebar />
+        <CanvasSidebar isMultiplayer={isMultiplayer} />
         <CanvasControls isMultiplayer={isMultiplayer} />
       </div>
-      {isMultiplayer && <MultiplayerCursors />}
+      {isMultiplayer && viewport.expandedNodeId === "" && (
+        <MultiplayerCursors />
+      )}
     </div>
   );
 }

@@ -4,8 +4,6 @@ import { loadable } from "jotai/utils";
 import {
   nodesAtom,
   viewportAtom,
-  storeFileContent,
-  deleteFileContent,
   codesAtom,
   codeGroupsAtom,
   editorsAtom,
@@ -20,7 +18,6 @@ import type {
   FileNode,
   FileType,
   Viewport,
-  FileContent,
   Code,
   CodeGroup,
   CodeSelection,
@@ -33,7 +30,6 @@ const { MIN_SCALE, MAX_SCALE, ZOOM_BUTTON_FACTOR } = VIEWPORT_CONSTANTS;
 
 export function useCanvas() {
   const canvasRef = useRef<HTMLDivElement>(null);
-
   // Create loadable atoms to handle loading states
   const nodesLoadable = useAtomValue(loadable(nodesAtom));
   const viewportLoadable = useAtomValue(loadable(viewportAtom));
@@ -48,10 +44,12 @@ export function useCanvas() {
     codeGroupsLoadable.state === "loading";
 
   // Use the loadable values once loaded
+
   const [nodes, setNodes] = useAtom(nodesAtom);
   const [viewport, setViewport] = useAtom(viewportAtom);
   const [codes, setCodes] = useAtom(codesAtom);
   const [codeGroups, setCodeGroups] = useAtom(codeGroupsAtom);
+
   const [editors, setEditors] = useAtom(editorsAtom);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -472,16 +470,16 @@ export function useCanvas() {
       content = await readFileContent(file);
 
       // Store in IndexedDB
-      const fileContent: FileContent = {
-        id: nodeId,
-        name: fileName,
-        type: fileType,
-        content,
-        size: file.size,
-        lastModified: file.lastModified,
-      };
+      // const fileContent: FileContent = {
+      //   id: nodeId,
+      //   name: fileName,
+      //   type: fileType,
+      //   content,
+      //   size: file.size,
+      //   lastModified: file.lastModified,
+      // };
 
-      await storeFileContent(fileContent);
+      // await storeFileContent(fileContent);
     } catch (error) {
       console.error("Error processing file:", error);
       // Continue with node creation even if file processing fails
@@ -497,7 +495,8 @@ export function useCanvas() {
       width: NODE_CONSTANTS.FILE_NODE_WIDTH,
       height: NODE_CONSTANTS.NODE_HEIGHT,
       fileType: fileType,
-      vrText: {},
+      vrText: fileType === "image" ? { image: content } : {},
+      content,
     };
 
     setNodes((prev) => [...prev, newNode]);
@@ -516,12 +515,12 @@ export function useCanvas() {
     // Delete the node from the nodes array
     setNodes((prevNodes) => prevNodes.filter((node) => node.id !== nodeId));
 
-    // If it's a file node, also delete the file content from IndexedDB
-    if (nodeToDelete?.type === "file") {
-      deleteFileContent(nodeId).catch((err) =>
-        console.error("Failed to delete file content:", err)
-      );
-    }
+    // // If it's a file node, also delete the file content from IndexedDB
+    // if (nodeToDelete?.type === "file") {
+    //   deleteFileContent(nodeId).catch((err) =>
+    //     console.error("Failed to delete file content:", err)
+    //   );
+    // }
 
     // Clear selection if the deleted node was selected
     if (
@@ -850,6 +849,7 @@ export function useCanvas() {
       getEditor,
       setEditor,
       getEditors,
+      getRandomPositionInViewport,
     },
     dragHandlers: {
       startNodeDrag,

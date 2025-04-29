@@ -1,34 +1,13 @@
-import { useEffect, useState } from "react";
-import { FileContent, FileNode } from "../types";
+import { FileNode } from "../types";
 import { useCanvas } from "../useCanvas";
-import { FileTextIcon } from "lucide-react";
-import { getFileContent, storeFileContent } from "../store";
 import { Editor } from "../text-editor";
 import { JSONContent } from "@tiptap/react";
 
 export function FileNodeContent({ node }: { node: FileNode }) {
   const {
     controls: { updateNode },
+    canvas: { codes, codeGroups },
   } = useCanvas();
-  const [fileContent, setFileContent] = useState<FileContent>();
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    const fetchFileContent = async () => {
-      try {
-        setLoading(true);
-        const content = await getFileContent(node.id);
-        setFileContent(content);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching file content:", err);
-        setError("Failed to load file content");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFileContent();
-  }, [node.fileType, node.file]);
 
   const handleContentChange = ({
     content,
@@ -37,63 +16,32 @@ export function FileNodeContent({ node }: { node: FileNode }) {
     content: string;
     text: JSONContent;
   }) => {
-    if (fileContent?.type === "text") {
-      setFileContent({
-        ...fileContent,
-        content: content,
-      });
-      updateNode(node.id, {
-        vrText: text,
-      });
-      storeFileContent(fileContent);
-    }
+    updateNode(node.id, {
+      text: content,
+      vrText: text,
+    });
   };
 
-  if (loading) {
+  if (node.fileType === "image") {
     return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-sm text-destructive">{error}</p>
-      </div>
-    );
-  }
-
-  if (!fileContent) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-2">
-        <FileTextIcon className="w-8 h-8 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
-          {node.label || "Empty file"}
-        </p>
-      </div>
-    );
-  }
-
-  if (fileContent.type === "image") {
-    return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full w-full overflow-scroll">
         <img
-          src={fileContent.content as string}
-          alt={fileContent.name}
+          src={node.content as string}
+          alt={node.file}
           className="max-w-full max-h-full object-contain"
         />
       </div>
     );
   }
 
-  if (fileContent.type === "text") {
+  if (node.fileType === "text") {
     return (
       <Editor
-        content={fileContent.content as string}
+        content={node.content as string}
         onChange={handleContentChange}
         nodeId={node.id}
+        codes={codes}
+        codeGroups={codeGroups}
       />
     );
   }

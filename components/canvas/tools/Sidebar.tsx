@@ -6,8 +6,13 @@ import { useCanvas } from "../useCanvas";
 import { motion } from "motion/react";
 import { AddCodeDialog } from "../dialogs/AddCodeDialog";
 import { AddFileDialog } from "../dialogs/AddFileDialog";
+import {
+  AddMultiplayerFileNode,
+  AddMultiplayerNode,
+} from "../multiplayer/nodes";
+import { AddMultiplayerCodeDialog } from "../multiplayer/code";
 
-export function CanvasSidebar() {
+export function CanvasSidebar({ isMultiplayer }: { isMultiplayer?: boolean }) {
   const { canvas, controls } = useCanvas();
   const { addTextNode } = controls;
   const isExpanded = canvas.viewport.expandedNodeId !== "";
@@ -25,22 +30,26 @@ export function CanvasSidebar() {
       }}
     >
       {/* Text node */}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={addTextNode}
-        aria-label="Add text"
-        tooltip="Add text node"
-        tooltipSide="right"
-      >
-        <TypeIcon size={20} />
-      </Button>
+      {isMultiplayer ? (
+        <AddMultiplayerNode />
+      ) : (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={addTextNode}
+          aria-label="Add text"
+          tooltip="Add text node"
+          tooltipSide="right"
+        >
+          <TypeIcon size={20} />
+        </Button>
+      )}
 
       {/* Add File */}
-      <AddFileDialog />
+      {isMultiplayer ? <AddMultiplayerFileNode /> : <AddFileDialog />}
 
       {/* Add Code */}
-      <AddCodeDialog />
+      {isMultiplayer ? <AddMultiplayerCodeDialog /> : <AddCodeDialog />}
     </motion.div>
   );
 }

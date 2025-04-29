@@ -33,7 +33,7 @@ import {
 import Highlight from "@tiptap/extension-highlight";
 import { motion } from "motion/react";
 import { useCanvas } from "../useCanvas";
-
+import type { Code, CodeGroup } from "../types";
 const extensions = [
   StarterKit.configure({
     orderedList: {
@@ -92,9 +92,18 @@ interface EditorProps {
   }) => void;
   className?: string;
   nodeId: string;
+  codes: Code[];
+  codeGroups: CodeGroup[];
 }
 
-const Editor = ({ content, onChange, className, nodeId }: EditorProps) => {
+const Editor = ({
+  content,
+  onChange,
+  className,
+  nodeId,
+  codes,
+  codeGroups,
+}: EditorProps) => {
   const { canvas, controls } = useCanvas();
   const { viewport } = canvas;
   const isExpanded = viewport.expandedNodeId === nodeId;
@@ -133,6 +142,13 @@ const Editor = ({ content, onChange, className, nodeId }: EditorProps) => {
     }
   }, [isExpanded, editor]);
 
+  // Add effect to update editor content when content prop changes
+  useEffect(() => {
+    if (editor && content && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
+
   if (!editor) {
     return null;
   }
@@ -143,8 +159,10 @@ const Editor = ({ content, onChange, className, nodeId }: EditorProps) => {
         className
       )}
     >
-      {editor && <CodeGroupMenu editor={editor} nodeId={nodeId} />}
-      {editor && <ThemeMarkBubble editor={editor} />}
+      {editor && (
+        <CodeGroupMenu editor={editor} codes={codes} codeGroups={codeGroups} />
+      )}
+      {editor && <ThemeMarkBubble editor={editor} codes={codes} />}
       {isEditable && (
         <div className="flex w-full items-center overflow-x-auto overflow-y-hidden py-2 px-2 justify-start border-b sticky top-0 left-0 bg-background dark:bg-[#1e0516] z-20 border-border">
           <ToolbarProvider editor={editor}>

@@ -1,6 +1,5 @@
 import { BubbleMenu, Editor } from "@tiptap/react";
-import { useCanvas } from "../../useCanvas";
-import type { Code } from "../../types";
+import type { Code, CodeGroup } from "../../types";
 import { OctagonXIcon, Search } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -8,12 +7,13 @@ import { Switch } from "@/components/ui/switch";
 
 export const CodeGroupMenu = ({
   editor,
+  codes,
+  codeGroups,
 }: {
   editor: Editor;
-  nodeId: string;
+  codes: Code[];
+  codeGroups: CodeGroup[];
 }) => {
-  const { canvas } = useCanvas();
-  const { codes, codeGroups } = canvas;
   const [searchQuery, setSearchQuery] = useState("");
 
   const isCodeApplied = (codeId: string) => {

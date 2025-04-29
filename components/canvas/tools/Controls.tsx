@@ -11,6 +11,8 @@ import { DebugDialog } from "../dialogs/DebugDialog";
 import { VRCanvas } from "../3d";
 import { MultiplayerDialog } from "../dialogs/MultiplayerDialog";
 import { UsersList } from "../multiplayer/user-list";
+import { MultiplayerNodeManager } from "../multiplayer/nodes";
+import { MultiplayerCodeManager } from "../multiplayer/code";
 
 export function CanvasControls({ isMultiplayer }: { isMultiplayer?: boolean }) {
   const { controls, canvas } = useCanvas();
@@ -86,13 +88,13 @@ export function CanvasControls({ isMultiplayer }: { isMultiplayer?: boolean }) {
         </Button>
       </div>
       <div className="absolute top-4 right-4 flex items-center gap-1 rounded-md bg-background/60 border border-border px-2 py-1.5 backdrop-blur-sm">
-        <NodeManager />
-        <CodeManager />
-        <VRCanvas />
+        {isMultiplayer ? <MultiplayerNodeManager /> : <NodeManager />}
+        {isMultiplayer ? <MultiplayerCodeManager /> : <CodeManager />}
+        {!isMultiplayer && <VRCanvas />}
         {isMultiplayer ? <UsersList /> : <MultiplayerDialog />}
         <div className="h-6 w-px bg-border mx-1"></div>
         <ModeToggle />
-        <DebugDialog />
+        <DebugDialog isMultiplayer={isMultiplayer} />
       </div>
     </motion.div>
   );
