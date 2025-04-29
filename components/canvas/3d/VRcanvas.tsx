@@ -104,7 +104,7 @@ export default function VRCanvas() {
         {/* <OrbitHandles /> */}
         <XR store={xrStore}>
           <NonAREnvironment environment={viewport.vrEnvironment} />
-          <XROrigin position-y={-0.5} position-z={0.5} />
+          <XROrigin position-z={0.5} />
           {nodes.map((node, index) => (
             <NodePanel key={node.id} node={node} position={positions[index]} />
           ))}
