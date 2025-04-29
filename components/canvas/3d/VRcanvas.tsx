@@ -20,7 +20,7 @@ import { useCanvas } from "../useCanvas";
 import { Model as Room, Light, Sphere } from "./assets/room";
 import { useTheme } from "next-themes";
 import { Node } from "../types";
-import NodePanel, { Toolbar } from "./assets/panel";
+import NodePanel, { Toolbar, CodeListPanel } from "./assets/panel";
 
 export const xrStore = createXRStore({
   foveation: 0,
@@ -114,6 +114,7 @@ export default function VRCanvas() {
             <NodePanel key={node.id} node={node} position={positions[index]} />
           ))}
           <Toolbar position={[0, 0, -0.6]} />
+          <CodeListPanel position={[0.8, 0, -0.6]} />
         </XR>
       </Canvas>
       <div

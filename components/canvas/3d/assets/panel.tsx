@@ -525,3 +525,128 @@ export function Toolbar({ position }: { position: [number, number, number] }) {
     </group>
   );
 }
+
+export function CodeListPanel({
+  position,
+}: {
+  position: [number, number, number];
+}) {
+  const { canvas } = useCanvas();
+  const { codes } = canvas;
+  const ref = useRef<Group>(null);
+  const innerTarget = useRef<Group>(null);
+  const storeRef = useRef<HandleStore<any>>(null);
+
+  useFrame((state, dt) => {
+    if (ref.current == null || storeRef.current?.getState() == null) {
+      return;
+    }
+    state.camera.getWorldPosition(vectorHelper1);
+    ref.current.getWorldPosition(vectorHelper2);
+    quaternionHelper.setFromUnitVectors(
+      zAxis,
+      vectorHelper1.sub(vectorHelper2).normalize()
+    );
+    eulerHelper.setFromQuaternion(quaternionHelper, "YXZ");
+    ref.current.rotation.y = MathUtils.damp(
+      ref.current.rotation.y,
+      eulerHelper.y,
+      10,
+      dt
+    );
+  });
+
+  return (
+    <group position={position}>
+      <HandleTarget>
+        <group ref={ref} pointerEventsType={{ deny: "grab" }}>
+          <group ref={innerTarget}>
+            <Root
+              anchorY="bottom"
+              width={200}
+              height={300}
+              alignItems="center"
+              flexDirection="column"
+              pixelSize={0.0015}
+            >
+              <Card
+                hover={{ borderColor: "rgb(94,6,65)" }}
+                dark={{
+                  borderColor: "rgb(63,6,45)",
+                  backgroundColor: "rgb(30,5,22)",
+                }}
+                width="100%"
+                height="100%"
+                borderWidth={4}
+                borderColor="rgb(221,221,221)"
+                backgroundColor="rgb(255,255,255)"
+                display="flex"
+                flexDirection="column"
+                alignItems="flex-start"
+                gap={8}
+                padding={8}
+              >
+                <CardHeader
+                  display="flex"
+                  flexDirection="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  padding={2}
+                  borderBottomWidth={1}
+                  flexShrink={0}
+                >
+                  <Text
+                    fontSize={14}
+                    lineHeight={20}
+                    fontWeight={500}
+                    color="rgb(63,6,45)"
+                    dark={{ color: "rgb(255,255,255)" }}
+                  >
+                    Code List
+                  </Text>
+                </CardHeader>
+                <CardContent
+                  padding={8}
+                  flexGrow={1}
+                  alignItems="flex-start"
+                  overflow="scroll"
+                  scrollbarOpacity={0.2}
+                  scrollbarBorderRadius={4}
+                >
+                  <Container flexDirection="column" gap={4}>
+                    {codes.map((code) => (
+                      <Container
+                        key={code.id}
+                        flexDirection="row"
+                        alignItems="center"
+                        gap={8}
+                        padding={4}
+                        borderRadius={4}
+                      >
+                        <Container
+                          width={12}
+                          height={12}
+                          borderRadius={6}
+                          backgroundColor={code.color}
+                        />
+                        <Text
+                          fontSize={12}
+                          lineHeight={16}
+                          color="rgb(63,6,45)"
+                          dark={{ color: "rgb(255,255,255)" }}
+                        >
+                          {code.name}
+                        </Text>
+                      </Container>
+                    ))}
+                  </Container>
+                </CardContent>
+              </Card>
+              <BarHandle ref={storeRef} />
+            </Root>
+          </group>
+        </group>
+      </HandleTarget>
+    </group>
+  );
+}
