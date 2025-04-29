@@ -39,6 +39,7 @@ export const defaultViewport: Viewport = {
     initialNodeX: 0,
     initialNodeY: 0,
   },
+  multiplayerRoom: "",
 };
 
 export const PREDEFINED_COLORS = [

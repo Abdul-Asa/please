@@ -2,37 +2,12 @@
 import { CanvasNodes } from "./node";
 import { useCanvas } from "./useCanvas";
 import { Loader2 } from "lucide-react";
-import { CanvasContextType, CanvasData } from "./types";
-import { createContext, ReactNode } from "react";
 import { CanvasSidebar } from "./tools/Sidebar";
 import { CanvasControls } from "./tools/Controls";
 import VRCanvas from "./3d/VRcanvas";
+import { MultiplayerCursors } from "./multiplayer/cursor";
 
-// Context for the canvas
-export const CanvasContext = createContext<CanvasContextType | null>(null);
-function CanvasProvider({
-  children,
-  initialData,
-}: {
-  children: ReactNode;
-  initialData: CanvasData | null;
-}) {
-  return (
-    <CanvasContext.Provider value={{ initialData }}>
-      {children}
-    </CanvasContext.Provider>
-  );
-}
-
-export function Canvas() {
-  return (
-    <CanvasProvider initialData={null}>
-      <CanvasContent />
-    </CanvasProvider>
-  );
-}
-
-function CanvasContent() {
+export function Canvas({ isMultiplayer }: { isMultiplayer: boolean }) {
   const { canvas, canvasRef, loading } = useCanvas();
   const { viewport } = canvas;
 
@@ -69,8 +44,9 @@ function CanvasContent() {
           <CanvasNodes />
         )}
         <CanvasSidebar />
-        <CanvasControls />
+        <CanvasControls isMultiplayer={isMultiplayer} />
       </div>
+      {isMultiplayer && <MultiplayerCursors />}
     </div>
   );
 }

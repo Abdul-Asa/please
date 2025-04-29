@@ -1,5 +1,5 @@
+import { JsonObject } from "@liveblocks/client";
 import { Editor, JSONContent } from "@tiptap/react";
-
 export type NodeType = "text" | "file";
 export type FileType = "image" | "pdf" | "text";
 
@@ -50,6 +50,7 @@ export interface Viewport {
     initialNodeX: number;
     initialNodeY: number;
   };
+  multiplayerRoom: string;
 }
 
 export interface CanvasData {
@@ -64,10 +65,6 @@ export interface FileContent {
   content: string | ArrayBuffer;
   size: number;
   lastModified: number;
-}
-
-export interface CanvasContextType {
-  initialData: CanvasData | null;
 }
 
 export interface CodeSelection {
@@ -92,3 +89,16 @@ export interface CodeGroup {
   id: string;
   name: string;
 }
+
+export type LiveNode = JsonObject & Node;
+
+export type LiveViewport = JsonObject & Viewport;
+
+export type LiveCode = JsonObject & Code;
+
+export type LiveCodeGroup = JsonObject & CodeGroup;
+
+export type LiveFileContent = JsonObject &
+  FileContent & {
+    content: string;
+  };

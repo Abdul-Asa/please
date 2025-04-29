@@ -1,5 +1,5 @@
 "use client";
 import { Canvas } from "@/components/canvas";
 export default function Home() {
-  return <Canvas />;
+  return <Canvas isMultiplayer={false} />;
 }

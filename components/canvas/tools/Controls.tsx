@@ -9,8 +9,10 @@ import { NodeManager } from "../dialogs/NodeManager";
 import { CodeManager } from "../dialogs/CodeManager";
 import { DebugDialog } from "../dialogs/DebugDialog";
 import { VRCanvas } from "../3d";
+import { MultiplayerDialog } from "../dialogs/MultiplayerDialog";
+import { UsersList } from "../multiplayer/user-list";
 
-export function CanvasControls() {
+export function CanvasControls({ isMultiplayer }: { isMultiplayer?: boolean }) {
   const { controls, canvas } = useCanvas();
   const { zoomIn, zoomOut, resetView, togglePanMode, resetToDefaultView } =
     controls;
@@ -87,6 +89,7 @@ export function CanvasControls() {
         <NodeManager />
         <CodeManager />
         <VRCanvas />
+        {isMultiplayer ? <UsersList /> : <MultiplayerDialog />}
         <div className="h-6 w-px bg-border mx-1"></div>
         <ModeToggle />
         <DebugDialog />

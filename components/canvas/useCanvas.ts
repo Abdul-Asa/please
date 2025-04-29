@@ -1,5 +1,6 @@
-import { useAtom } from "jotai";
-import { useContext, useRef, useEffect, useState } from "react";
+import { useAtom, useAtomValue } from "jotai";
+import { useRef, useEffect } from "react";
+import { loadable } from "jotai/utils";
 import {
   nodesAtom,
   viewportAtom,
@@ -26,20 +27,27 @@ import type {
 } from "./types";
 import { nanoid } from "nanoid";
 import { readFileContent } from "./utils";
-import { CanvasContext } from ".";
 import { Editor } from "@tiptap/react";
 import { Node as ProseMirrorNode, Mark } from "prosemirror-model";
 const { MIN_SCALE, MAX_SCALE, ZOOM_BUTTON_FACTOR } = VIEWPORT_CONSTANTS;
 
 export function useCanvas() {
-  const context = useContext(CanvasContext);
-  if (!context) {
-    throw new Error("useCanvas must be used within a Canvas component");
-  }
-  const { initialData } = context;
-
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [loading, setLoading] = useState(true);
+
+  // Create loadable atoms to handle loading states
+  const nodesLoadable = useAtomValue(loadable(nodesAtom));
+  const viewportLoadable = useAtomValue(loadable(viewportAtom));
+  const codesLoadable = useAtomValue(loadable(codesAtom));
+  const codeGroupsLoadable = useAtomValue(loadable(codeGroupsAtom));
+
+  // Determine if any atom is still loading
+  const isLoading =
+    nodesLoadable.state === "loading" ||
+    viewportLoadable.state === "loading" ||
+    codesLoadable.state === "loading" ||
+    codeGroupsLoadable.state === "loading";
+
+  // Use the loadable values once loaded
   const [nodes, setNodes] = useAtom(nodesAtom);
   const [viewport, setViewport] = useAtom(viewportAtom);
   const [codes, setCodes] = useAtom(codesAtom);
@@ -745,15 +753,6 @@ export function useCanvas() {
     editor.chain().focus().setTextSelection({ from, to }).run();
   };
 
-  // Initialize the canvas
-  useEffect(() => {
-    if (initialData) {
-      setNodes(initialData.nodes);
-      resetView();
-    }
-    setLoading(false);
-  }, [initialData]);
-
   // Manage cursor class based on panMode
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -825,7 +824,7 @@ export function useCanvas() {
 
   return {
     canvas: { nodes, viewport, codes, codeGroups },
-    loading,
+    loading: isLoading,
     canvasRef,
     controls: {
       zoomIn,
