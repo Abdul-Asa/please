@@ -5,10 +5,13 @@ import type { Node, Viewport, Code, CodeGroup } from "./types";
 import { defaultViewport } from "./constants";
 // import Dexie from "dexie";
 // Persistent atoms
-export const nodesAtom = atom<Node[]>([]);
-export const viewportAtom = atom<Viewport>(defaultViewport);
-export const codesAtom = atom<Code[]>([]);
-export const codeGroupsAtom = atom<CodeGroup[]>([]);
+export const nodesAtom = atomWithStorage<Node[]>("nodes", []);
+export const viewportAtom = atomWithStorage<Viewport>(
+  "viewport",
+  defaultViewport
+);
+export const codesAtom = atomWithStorage<Code[]>("codes", []);
+export const codeGroupsAtom = atomWithStorage<CodeGroup[]>("codeGroups", []);
 export const editorsAtom = atom<Map<string, Editor>>(new Map());
 
 // IndexedDB store

@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
 import { useRouter } from "next/navigation";
-
+import { useCanvas } from "../useCanvas";
 export function UsersList() {
   const router = useRouter();
   const others = useOthers();

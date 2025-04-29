@@ -139,12 +139,5 @@ export function MultiplayerCursors() {
     viewport.panOffsetY,
   ]);
 
-  return (
-    <>
-      {others.map((other) => (
-        <Cursor key={other.id} {...other.presence} />
-      ))}
-      {/* <Cursor {...myPresence} isClient /> */}
-    </>
-  );
+  return others.map((other) => <Cursor key={other.id} {...other.presence} />);
 }

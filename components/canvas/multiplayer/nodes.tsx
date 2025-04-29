@@ -446,6 +446,7 @@ export function MultiplayerNodeManager() {
   const [open, setOpen] = useState(false);
 
   const nodes = useStorage((root) => root.nodes);
+  const codes = useStorage((root) => root.codes);
   const position = getRandomPositionInViewport();
   const deleteNode = useMutation(({ storage }, nodeId: string) => {
     const nodes = storage.get("nodes");
@@ -463,7 +464,7 @@ export function MultiplayerNodeManager() {
 
   const getSelectionCount = (nodeId: string) => {
     let count = 0;
-    canvas.codes.forEach((code) => {
+    codes.forEach((code) => {
       const selections = getCodeSelections(code.id);
       count += selections.filter((s) => s.nodeId === nodeId).length;
     });

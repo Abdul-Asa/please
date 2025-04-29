@@ -13,6 +13,7 @@ import {
   ComponentInternals,
   PreferredColorScheme,
   setPreferredColorScheme,
+  Image,
 } from "@react-three/uikit";
 import {
   MaximizeIcon,
@@ -320,8 +321,12 @@ const BarHandle = forwardRef<HandleStore<any>, {}>((props, ref) => {
 });
 
 export function convertVrJsonToUIKit(json: JSONContent) {
-  if (!json || !json.content) return null;
+  if (!json) return null;
 
+  if (json.image) {
+    return <Image src={json.image} height={200} width={200} />;
+  }
+  if (!json.content) return null;
   return json.content.map((paragraph, pIdx) => {
     if (paragraph.type !== "paragraph") return null;
 

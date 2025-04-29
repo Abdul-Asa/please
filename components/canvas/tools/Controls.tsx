@@ -16,8 +16,14 @@ import { MultiplayerCodeManager } from "../multiplayer/code";
 
 export function CanvasControls({ isMultiplayer }: { isMultiplayer?: boolean }) {
   const { controls, canvas } = useCanvas();
-  const { zoomIn, zoomOut, resetView, togglePanMode, resetToDefaultView } =
-    controls;
+  const {
+    zoomIn,
+    zoomOut,
+    resetView,
+    togglePanMode,
+    resetToDefaultView,
+    updateViewport,
+  } = controls;
   const { panMode, scale, expandedNodeId } = canvas.viewport;
   const isExpanded = expandedNodeId !== "";
 
@@ -45,7 +51,8 @@ export function CanvasControls({ isMultiplayer }: { isMultiplayer?: boolean }) {
 
         <div
           className="min-w-[4.5rem] px-2 text-center text-sm cursor-pointer"
-          onClick={resetToDefaultView}
+          onDoubleClick={resetToDefaultView}
+          onClick={() => updateViewport({ scale: 1 })}
           title="Reset Zoom"
         >
           {Math.round(scale * 100)}%
