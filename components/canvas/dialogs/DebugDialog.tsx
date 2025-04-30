@@ -10,7 +10,7 @@ import { MultiplayerDebug } from "../multiplayer/debug";
 
 export function DebugDialog({ isMultiplayer }: { isMultiplayer?: boolean }) {
   const { canvas, controls } = useCanvas();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const createDemoProject = () => {
     // Clear existing data
