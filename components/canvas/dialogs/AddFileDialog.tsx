@@ -60,7 +60,7 @@ export function AddFileDialog() {
               drop
             </p>
             <p className="text-xs text-muted-foreground">
-              .txt, .md, .docx, and image files supported
+              .txt, .md, .docx, .html, and image files supported
             </p>
           </div>
           <input
@@ -68,7 +68,7 @@ export function AddFileDialog() {
             type="file"
             className="hidden"
             onChange={handleFileUpload}
-            accept=".txt,.md,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+            accept=".txt,.md,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*,html"
           />
         </label>
       </div>
