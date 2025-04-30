@@ -68,7 +68,7 @@ export function AddFileDialog() {
             type="file"
             className="hidden"
             onChange={handleFileUpload}
-            accept=".txt,.md,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*,html"
+            accept=".txt,.md,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*,.html"
           />
         </label>
       </div>
