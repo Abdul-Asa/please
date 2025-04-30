@@ -91,6 +91,17 @@ export function UsersList() {
         ))}
 
         <DropdownMenuSeparator />
+        <Button
+          className="w-full"
+          variant="destructive"
+          onClick={() => {
+            navigator.clipboard.writeText(window.location.href);
+          }}
+        >
+          Share Room
+        </Button>
+        <DropdownMenuSeparator />
+
         <Button className="w-full" variant="destructive" onClick={exitRoom}>
           Exit Room
         </Button>
