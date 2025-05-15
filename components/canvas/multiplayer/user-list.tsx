@@ -1,6 +1,11 @@
 "use client";
 
-import { useMyPresence, useOthers, useSelf } from "@liveblocks/react/suspense";
+import {
+  useMyPresence,
+  useOthers,
+  useSelf,
+  useStorage,
+} from "@liveblocks/react/suspense";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -13,10 +18,24 @@ import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCanvas } from "../useCanvas";
+import { useAtom } from "jotai";
+import { nodesAtom, codesAtom, codeGroupsAtom } from "../store";
+
 export function UsersList() {
   const router = useRouter();
   const others = useOthers();
   const [presence, setPresence] = useMyPresence();
+  // const {
+  //   controls: { updateNode, updateCode, updateCodeGroup },
+  // } = useCanvas();
+  const [, setNodes] = useAtom(nodesAtom);
+  const [, setCodes] = useAtom(codesAtom);
+  const [, setCodeGroups] = useAtom(codeGroupsAtom);
+
+  // Get Liveblocks storage data at component level
+  const liveNodes = useStorage((root) => root.nodes);
+  const liveCodes = useStorage((root) => root.codes);
+  const liveCodeGroups = useStorage((root) => root.codeGroups);
 
   const handleNameChange = (e: React.FocusEvent<HTMLSpanElement>) => {
     const newName = e.currentTarget.textContent?.trim();
@@ -38,7 +57,15 @@ export function UsersList() {
   };
 
   const exitRoom = () => {
+    saveRoomToLocalStorage();
     router.push("/");
+  };
+
+  const saveRoomToLocalStorage = () => {
+    // Convert readonly arrays to mutable arrays and save to local storage
+    setNodes([...liveNodes]);
+    setCodes([...liveCodes]);
+    setCodeGroups([...liveCodeGroups]);
   };
 
   return (
@@ -93,7 +120,7 @@ export function UsersList() {
         <DropdownMenuSeparator />
         <Button
           className="w-full"
-          variant="destructive"
+          variant="outline"
           onClick={() => {
             navigator.clipboard.writeText(window.location.href);
           }}
